@@ -1,0 +1,35 @@
+import 'package:equatable/equatable.dart';
+
+/// Represents a standardized server-side error within the application.
+///
+/// This exception is used to wrap API or system-level errors
+/// into a consistent format containing both a [message] and a [statusCode].
+/// It integrates with [Equatable] to support value comparison, which makes
+/// it easy to use in testing and state management.
+///
+/// ## Fields
+/// - [message] → Human-readable description of the error.
+/// - [statusCode] → Numeric code representing the error (e.g., HTTP status).
+///
+/// ## Example
+/// ```dart
+/// try {
+///   throw const ServerException(message: "Unauthorized", statusCode: 401);
+/// } on ServerException catch (e) {
+///   print(e.message); // Unauthorized
+///   print(e.statusCode); // 401
+/// }
+/// ```
+class ServerException extends Equatable implements Exception {
+  /// Creates a [ServerException] with the given [message] and [statusCode].
+  const ServerException({required this.message, required this.statusCode});
+
+  /// Human-readable description of the error.
+  final String message;
+
+  /// Numeric code representing the error (e.g., HTTP status code).
+  final int statusCode;
+
+  @override
+  List<Object?> get props => [message, statusCode];
+}

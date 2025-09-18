@@ -1,0 +1,74 @@
+import 'package:equatable/equatable.dart';
+import 'package:gymtor/core/errors/exceptions.dart';
+
+/// Base class for application failures.
+///
+/// A [Failure] represents an error that has been transformed
+/// from a low-level [Exception] (e.g., [ServerException]) into
+/// a higher-level abstraction suitable for the domain and
+/// presentation layers.
+///
+/// This ensures that the UI and use cases deal with **failures**
+/// instead of raw exceptions, keeping error handling consistent
+/// across the app.
+///
+/// ## Fields
+/// - [message] → Human-readable description of the error.
+/// - [statusCode] → Numeric code (e.g., HTTP status code).
+///
+/// ## Relation to Other Classes
+/// - [ServerException] (in `exceptions.dart`) is thrown at the
+///   **infrastructure/data layer** (e.g., in `HandleException`).
+/// - A [ServerFailure] (this class) wraps that exception so it
+///   can safely propagate to the **domain/presentation layers**.
+/// - This separation ensures **exceptions never leak into UI code**.
+abstract class Failure extends Equatable {
+  const Failure({required this.message, required this.statusCode});
+
+  /// Human-readable description of the failure.
+  final String message;
+
+  /// Numeric code representing the failure cause.
+  final int statusCode;
+
+  @override
+  List<Object> get props => [message, statusCode];
+}
+
+/// Specific failure type representing server-related errors.
+///
+/// Typically created from a [ServerException] via the
+/// [ServerFailure.fromException] constructor. This maps
+/// infrastructure-level exceptions into a failure that can
+/// be handled by the domain or presentation layer.
+///
+/// ## Example
+/// ```dart
+/// try {
+///   // Data source throws a ServerException
+///   throw const ServerException(message: "Unauthorized", statusCode: 401);
+/// } on ServerException catch (e) {
+///   // Map exception to failure
+///   final failure = ServerFailure.fromException(e);
+///   print(failure.message); // Unauthorized
+/// }
+/// ```
+///
+/// ## Relation to Other Classes
+/// - Created from [ServerException] (thrown in `HandleException.handlerException`).
+/// - Used in **use cases** and **BLoCs** to return errors consistently
+///   (often wrapped inside an `Either<Failure, T>`).
+class ServerFailure extends Failure {
+  /// Creates a [ServerFailure] directly with [message] and [statusCode].
+  const ServerFailure({required super.message, required super.statusCode});
+
+  /// Creates a [ServerFailure] from a [ServerException].
+  ServerFailure.fromException(ServerException exception)
+    : super(message: exception.message, statusCode: exception.statusCode);
+
+  /// An initial empty failure state.
+  static const initial = ServerFailure(message: '', statusCode: 0);
+
+  @override
+  List<Object> get props => [message, statusCode];
+}

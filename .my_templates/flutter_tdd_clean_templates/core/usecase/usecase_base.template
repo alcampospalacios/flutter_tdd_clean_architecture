@@ -1,0 +1,72 @@
+import '../utils/typedef.dart';
+
+/// Base class for a use case that requires input [Params].
+///
+/// A use case represents a single unit of business logic in the
+/// application (following the **Clean Architecture** pattern).
+///
+/// This abstract class defines a standard contract for executing
+/// a use case that expects parameters and returns a result wrapped
+/// in a [ResultFuture].
+///
+/// ## Example
+/// ```dart
+/// class GetUserProfile extends UsecaseBaseWithParams<User, int> {
+///   final UserRepository repository;
+///
+///   const GetUserProfile(this.repository);
+///
+///   @override
+///   ResultFuture<User> call(int userId) {
+///     return repository.fetchUser(userId);
+///   }
+/// }
+/// ```
+///
+/// - [T] is the type of data returned when the operation succeeds.
+/// - [Params] is the type of input required to execute the use case.
+abstract class UsecaseBaseWithParams<T, Params> {
+  const UsecaseBaseWithParams();
+
+  /// Executes the use case with the given [params].
+  ///
+  /// Returns a [ResultFuture] containing either:
+  /// - a value of type [T] on success, or
+  /// - a failure on error.
+  ResultFuture<T> call(Params params);
+}
+
+/// Base class for a use case that does not require input parameters.
+///
+/// A use case represents a single unit of business logic in the
+/// application (following the **Clean Architecture** pattern).
+///
+/// This abstract class defines a standard contract for executing
+/// a use case that does not require any input and returns a result
+/// wrapped in a [ResultFuture].
+///
+/// ## Example
+/// ```dart
+/// class GetAppConfig extends UsecaseBaseWithoutParams<Config> {
+///   final ConfigRepository repository;
+///
+///   const GetAppConfig(this.repository);
+///
+///   @override
+///   ResultFuture<Config> call() {
+///     return repository.loadConfig();
+///   }
+/// }
+/// ```
+///
+/// - [T] is the type of data returned when the operation succeeds.
+abstract class UsecaseBaseWithoutParams<T> {
+  const UsecaseBaseWithoutParams();
+
+  /// Executes the use case with no parameters.
+  ///
+  /// Returns a [ResultFuture] containing either:
+  /// - a value of type [T] on success, or
+  /// - a failure on error.
+  ResultFuture<T> call();
+}

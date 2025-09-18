@@ -1,0 +1,24 @@
+import 'dart:io';
+
+/// Loads the contents of a fixture file from the `test/fixtures/` directory.
+///
+/// This is a utility function for testing purposes, allowing you to
+/// easily read mock JSON or other static files used in unit and
+/// integration tests.
+///
+/// ## Parameters
+/// - [name] → The name of the fixture file (e.g., `"user.json"`).
+///
+/// ## Returns
+/// The contents of the file as a [String].
+///
+/// ## Example
+/// ```dart
+/// final jsonString = fixture('user.json');
+/// final userMap = jsonDecode(jsonString);
+/// ```
+///
+/// ## Notes
+/// - The path `test/fixtures/` is relative to the root of the project.
+/// - Throws [FileSystemException] if the file does not exist or cannot be read.
+String fixture(String name) => File('test/fixtures/$name').readAsStringSync();

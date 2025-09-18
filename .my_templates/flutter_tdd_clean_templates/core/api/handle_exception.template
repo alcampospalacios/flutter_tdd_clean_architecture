@@ -1,0 +1,100 @@
+import 'dart:async';
+import 'dart:developer';
+import 'dart:io';
+
+import '../errors/exceptions.dart';
+
+/// Utility class for mapping different types of runtime errors
+/// into a standardized [ServerException].
+///
+/// This is used to handle errors from API requests or local
+/// operations and translate them into domain-level exceptions
+/// with proper messages and status codes.
+///
+/// Each supported error type is logged before being transformed
+/// into a [ServerException].
+class HandleException {
+  /// Handles an incoming [Object] error and rethrows it as a [ServerException].
+  ///
+  /// Supported error types:
+  /// - [SocketException] → network or connectivity errors.
+  /// - [TimeoutException] → request timeout errors.
+  /// - [FormatException] → JSON or data format parsing errors.
+  /// - [TlsException] → SSL/TLS certificate errors.
+  /// - [TypeError], [RangeError] → type casting or index/range errors.
+  /// - [ArgumentError] → invalid request parameters.
+  /// - [StateError] → invalid state operations.
+  /// - [UnsupportedError] → unsupported operations.
+  /// - [FileSystemException] → local file system errors.
+  /// - [OSError] → OS-level permission or access errors.
+  /// - [ServerException] → already standardized server errors.
+  ///
+  /// Any other unexpected error will be mapped to a generic [ServerException].
+  static ServerException handlerException(Object e) {
+    // Network and connectivity errors
+    if (e is SocketException) {
+      log('Connection error: ${e.message}');
+      throw ServerException(message: 'No internet connection. Please check your network.', statusCode: 503);
+    }
+    // Connection timeout
+    else if (e is TimeoutException) {
+      log('Timeout error: ${e.message}');
+      throw ServerException(message: 'Request timed out. Please try again later.', statusCode: 408);
+    }
+    // JSON / data parsing errors
+    else if (e is FormatException) {
+      log('Format error: ${e.message}');
+      throw ServerException(message: 'Invalid data format received.', statusCode: 422);
+    }
+    // SSL/TLS certificate errors
+    else if (e is TlsException) {
+      log('TLS certificate error: ${e.message}');
+      throw ServerException(message: 'Secure connection error.', statusCode: 495);
+    }
+    // Type casting error
+    else if (e is TypeError) {
+      log('Type error: ${e.toString()}');
+      throw ServerException(message: 'Data processing error.', statusCode: 422);
+    }
+    // Index/range error
+    else if (e is RangeError) {
+      log('Range error: ${e.toString()}');
+      throw ServerException(message: 'Data processing error.', statusCode: 422);
+    }
+    // Invalid argument error
+    else if (e is ArgumentError) {
+      log('Argument error: ${e.toString()}');
+      throw ServerException(message: 'Invalid request parameters.', statusCode: 400);
+    }
+    // Invalid state error
+    else if (e is StateError) {
+      log('State error: ${e.toString()}');
+      throw ServerException(message: 'Invalid operation in the current state.', statusCode: 409);
+    }
+    // Unsupported operation error
+    else if (e is UnsupportedError) {
+      log('Unsupported operation: ${e.toString()}');
+      throw ServerException(message: 'Operation not supported.', statusCode: 501);
+    }
+    // File system error
+    else if (e is FileSystemException) {
+      log('File system error: ${e.message}');
+      throw ServerException(message: 'Error accessing local files.', statusCode: 500);
+    }
+    // OS-level permission/access error
+    else if (e is OSError) {
+      log('OS error: ${e.message}');
+      throw ServerException(message: 'System permission error.', statusCode: 403);
+    }
+    // Already standardized server exception
+    else if (e is ServerException) {
+      log('Captured ServerException: ${e.message}');
+      throw e;
+    }
+    // Any other unexpected error
+    else {
+      log('Unexpected error: ${e.toString()}');
+      throw ServerException(message: 'Unexpected error. Please contact support.', statusCode: 500);
+    }
+  }
+}

@@ -1,0 +1,119 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+/// Contract for local storage operations.
+///
+/// Defines a unified interface for reading, writing, and deleting
+/// key-value data in local storage. Supports both:
+/// - **Standard storage** via [SharedPreferences] (non-sensitive data).
+/// - **Secure storage** via [FlutterSecureStorage] (sensitive data).
+///
+/// ## Methods
+/// - [write] → Saves a key-value pair.
+/// - [read] → Reads a value by key.
+/// - [delete] → Removes a key-value pair.
+/// - [clear] → Clears all stored values.
+///
+/// All methods support the optional [secure] flag to choose between
+/// secure or non-secure storage.
+abstract class ILocalStorageHandler {
+  /// Writes a [value] for the given [key].
+  ///
+  /// If [secure] is true, data is stored in [FlutterSecureStorage].
+  /// Otherwise, it is stored in [SharedPreferences].
+  Future<void> write(String key, String value, {bool secure = false});
+
+  /// Reads the value for the given [key].
+  ///
+  /// If [secure] is true, data is retrieved from [FlutterSecureStorage].
+  /// Otherwise, it is read from [SharedPreferences].
+  Future<String?> read(String key, {bool secure = false});
+
+  /// Deletes the value associated with the given [key].
+  ///
+  /// If [secure] is true, deletion occurs in [FlutterSecureStorage].
+  /// Otherwise, it is removed from [SharedPreferences].
+  Future<void> delete(String key, {bool secure = false});
+
+  /// Clears all stored values.
+  ///
+  /// If [secure] is true, all values in [FlutterSecureStorage] are deleted.
+  /// Otherwise, all values in [SharedPreferences] are cleared.
+  Future<void> clear({bool secure = false});
+}
+
+/// Concrete implementation of [ILocalStorageHandler].
+///
+/// Uses:
+/// - [SharedPreferences] for non-secure data such as simple settings,
+///   preferences, or flags.
+/// - [FlutterSecureStorage] for sensitive data such as authentication
+///   tokens or user credentials.
+///
+/// ## Example
+/// ```dart
+/// final handler = LocalStorageHandler(
+///   sharedPreferences: await SharedPreferences.getInstance(),
+///   secureStorage: const FlutterSecureStorage(),
+/// );
+///
+/// // Save non-secure data
+/// await handler.write("theme", "dark");
+///
+/// // Save secure data
+/// await handler.write("token", "abc123", secure: true);
+///
+/// // Read secure data
+/// final token = await handler.read("token", secure: true);
+/// ```
+///
+/// ## Relation to Other Classes
+/// - This handler is registered in the **Core DI setup** (`initCore`)
+///   and can be injected into repositories, use cases, or services
+///   that require local persistence.
+/// - Works alongside error handling ([ServerException]) when
+///   persistence operations fail.
+class LocalStorageHandler implements ILocalStorageHandler {
+  final SharedPreferences sharedPreferences;
+  final FlutterSecureStorage secureStorage;
+
+  /// Creates a [LocalStorageHandler] with references to both
+  /// [SharedPreferences] and [FlutterSecureStorage].
+  const LocalStorageHandler({required this.sharedPreferences, required this.secureStorage});
+
+  @override
+  Future<void> write(String key, String value, {bool secure = false}) async {
+    if (secure) {
+      await secureStorage.write(key: key, value: value);
+    } else {
+      await sharedPreferences.setString(key, value);
+    }
+  }
+
+  @override
+  Future<String?> read(String key, {bool secure = false}) async {
+    if (secure) {
+      return await secureStorage.read(key: key);
+    } else {
+      return sharedPreferences.getString(key);
+    }
+  }
+
+  @override
+  Future<void> delete(String key, {bool secure = false}) async {
+    if (secure) {
+      await secureStorage.delete(key: key);
+    } else {
+      await sharedPreferences.remove(key);
+    }
+  }
+
+  @override
+  Future<void> clear({bool secure = false}) async {
+    if (secure) {
+      await secureStorage.deleteAll();
+    } else {
+      await sharedPreferences.clear();
+    }
+  }
+}

@@ -1,0 +1,36 @@
+/// Centralized storage keys used in [ILocalStorageHandler].
+///
+/// This class defines constant keys for storing and retrieving
+/// values from local storage ([SharedPreferences] or [FlutterSecureStorage]).
+///
+/// Keeping keys centralized:
+/// - Prevents typos and duplication.
+/// - Ensures consistency across features.
+/// - Makes refactoring easier.
+///
+/// ## Example
+/// ```dart
+/// // Writing a secure access token
+/// await storageHandler.write(
+///   LocalStorageKeys.accessToken,
+///   "abc123",
+///   secure: true,
+/// );
+///
+/// // Reading the secure access token
+/// final token = await storageHandler.read(
+///   LocalStorageKeys.accessToken,
+///   secure: true,
+/// );
+/// ```
+///
+/// ## Design Notes
+/// - The private constructor [LocalStorageKeys._] prevents instantiation,
+///   making this class behave like a namespace for constants.
+class LocalStorageKeys {
+  /// Key for storing the access token in local or secure storage.
+  static const String accessToken = 'access_token';
+
+  /// Prevents instantiation.
+  LocalStorageKeys._();
+}

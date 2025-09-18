@@ -1,0 +1,75 @@
+import 'dart:developer';
+
+import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// Custom [Dio] interceptor for handling requests, authentication,
+/// and logging.
+///
+/// This interceptor is responsible for:
+/// - Logging every outgoing request (method, URL, headers,
+///   query parameters, and body).
+/// - Automatically attaching a Bearer token (if available in
+///   [SharedPreferences]) to requests, except when calling
+///   the `/auth/token` endpoint.
+/// - Handling authentication errors (401/403) at a global level.
+///
+/// ## Token Handling
+/// - The access token is expected to be stored under the key `"action"`
+///   in [SharedPreferences] as a JSON string.
+/// - If a token is found, it will be decoded and added to the
+///   `Authorization` header of the request as a Bearer token.
+///
+/// ## Example
+/// ```dart
+/// final dio = Dio();
+/// dio.interceptors.add(DioInterceptor(sharedPreferences: sl()));
+/// ```
+///
+/// ## Notes
+/// - This interceptor can be extended further to handle refresh tokens
+///   or centralized error responses.
+/// - Currently, `onResponse` is not overridden but can be implemented
+///   if additional logging or transformations are needed.
+class DioInterceptor extends Interceptor {
+  final SharedPreferences _sharedPreferences;
+
+  /// Creates a [DioInterceptor] with a reference to [SharedPreferences]
+  /// for retrieving authentication tokens.
+  DioInterceptor({required SharedPreferences sharedPreferences}) : _sharedPreferences = sharedPreferences;
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+    // Log outgoing request details
+    log("--> ${options.method != '' ? options.method.toUpperCase() : 'METHOD'} ${"${options.baseUrl}${options.path}"}");
+
+    log("Headers:");
+    options.headers.forEach((k, v) => log('$k: $v'));
+
+    log("queryParameters:");
+    options.queryParameters.forEach((k, v) => log('$k: $v'));
+
+    if (options.data != null) log("Body: ${options.data}");
+
+    log("--> END ${options.method != '' ? options.method.toUpperCase() : 'METHOD'}");
+
+    // Add bearer token if request is not for `/auth/token`
+    if (!options.path.contains('/auth/token')) {
+      final tokenStr = _sharedPreferences.getString('access_token');
+      if (tokenStr == null) return super.onRequest(options, handler);
+
+      options.headers['Authorization'] = 'Bearer $tokenStr';
+    }
+
+    return super.onRequest(options, handler);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    // Handle authentication errors globally
+    if (err.response != null && (err.response?.statusCode == 401 || err.response?.statusCode == 403)) {
+      // TODO: Add logic for token refresh or logout if needed
+    }
+    return super.onError(err, handler);
+  }
+}

@@ -1,0 +1,30 @@
+import '../errors/failure.dart';
+import 'either.dart';
+
+/// This allow to get a short way to reuse the declared method when some contract is created
+/// ## Example of use
+/// - [Before]
+///
+/// ```dart
+/// Future<Either<Failure, String>> getUserName();
+/// ```
+/// - [Now]
+/// ```dart
+/// ResultFuture<String> getUserName();
+/// ```
+/// With this approach we eliminate a bunch of boilerplate
+typedef ResultFuture<T> = Future<Either<Failure, T>>;
+
+/// This allow to get a short way to call maps
+/// ## Example of use
+/// - [Before]
+///
+/// ```dart
+/// Map<String, dynamic> getUserName();
+/// ```
+/// - [Now]
+/// ```dart
+/// DataMap getUserName();
+/// ```
+/// With this approach we eliminate a bunch of boilerplate
+typedef DataMap = Map<String, dynamic>;

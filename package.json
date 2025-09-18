@@ -1,0 +1,171 @@
+{
+  "name": "clean-architecture-scaffolding",
+  "displayName": "Clean Architecture Scaffolding",
+  "description": "Generate folder structure and files for features in Flutter projects in accord with your custom templates",
+  "publisher": "alcampospalacios",
+  "icon": "icon.png",
+  "homepage": "https://www.alcampospalacios.com",
+  "author": {
+    "name": "Alejandro Campos Palacios",
+    "email": "alcampospalacios92@gmail.com",
+    "url": "https://www.alcampospalacios.com"
+  },
+  "version": "0.1.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alcampospalacios/clean-architecture-scaffolding"
+  },
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": [
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "dart",
+    "flutter",
+    "clean architecture",
+    "clean arch"
+  ],
+  "activationEvents": [
+    "onCommand:tdd-clean-architecture.createInitials",
+    "onCommand:tdd-clean-architecture.createFolders",
+    "onCommand:tdd-clean-architecture.createUsecase"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": [
+      {
+        "title": "Clean Architecture Scaffolding",
+        "properties": {
+          "scaffolding.layers.templates": {
+            "type": "array",
+            "default": [
+             "{{root_folder}}/lib/src/{{feature_name}}/domain/usecases/{{usecase_name.snakeCase}}_usecase.template",
+             "{{root_folder}}/lib/src/{{feature_name}}/domain/repositories/{{usecase_name.snakeCase}}_repository.template",
+             "{{root_folder}}/lib/src/{{feature_name}}/domain/errors/",
+             "{{root_folder}}/lib/src/{{feature_name}}/domain/entities/",
+             "{{root_folder}}/lib/src/{{feature_name}}/data/models/",
+             "{{root_folder}}/lib/src/{{feature_name}}/data/repositories/",
+             "{{root_folder}}/lib/src/{{feature_name}}/data/datasources/{{usecase_name.snakeCase}}_datasource_impl.template",
+             "{{root_folder}}/lib/src/{{feature_name}}/presentation/blocs/",
+             "{{root_folder}}/lib/src/{{feature_name}}/presentation/pages/",
+             "{{root_folder}}/lib/src/{{feature_name}}/presentation/utils/",
+             "{{root_folder}}/lib/src/{{feature_name}}/presentation/widgets/",
+             "{{root_folder}}/lib/src/{{feature_name}}/config/",
+
+             "{{root_folder}}/test/src/{{feature_name}}/domain/usecases/{{usecase_name.snakeCase}}_usecase.template",
+             "{{root_folder}}/test/src/{{feature_name}}/domain/repositories/{{usecase_name.snakeCase}}_repository.template",
+             "{{root_folder}}/test/src/{{feature_name}}/domain/errors/",
+             "{{root_folder}}/test/src/{{feature_name}}/domain/entities/",
+             "{{root_folder}}/test/src/{{feature_name}}/data/models/",
+             "{{root_folder}}/test/src/{{feature_name}}/data/repositories/",
+             "{{root_folder}}/test/src/{{feature_name}}/data/datasources/{{usecase_name.snakeCase}}_datasource_impl.template",
+             "{{root_folder}}/test/src/{{feature_name}}/presentation/blocs/",
+             "{{root_folder}}/test/src/{{feature_name}}/presentation/pages/",
+             "{{root_folder}}/test/src/{{feature_name}}/presentation/utils/",
+             "{{root_folder}}/test/src/{{feature_name}}/presentation/widgets/"
+            ],
+            "markdownDescription": "#### You can use this special keywords to indicates some locations:\n- **{{package_name}}** to get name of your package in pubspec.yaml file;\n- **{{root_folder}}** to first folder of your projetc;\n- **{{custom_folder}}** to clicked folder;\n- **{{feature_name}}** to use the given custom name;\n- **{{usecase_name}}** to use a given usecase name;\n\n #### And you can associate this keywords with this format pattern too as given below:\n- **{{usecase_name.lowerCase}}** to use a given usecase name with lowercase pattern;\n- **{{usecase_name.upperCase}}** to use a given usecase name with UPPERCASE pattern;\n- **{{usecase_name.snakeCase}}** to use a given usecase name with snake_case pattern (indicate to file path names);\n- **{{usecase_name.pascalCase}}** to use a given usecase name with PascalCase pattern (indicate to Class names);\n- **{{usecase_name.camelCase}}**  to use a given usecase name with camelCase pattern (indicate to variables names).\n\n **Ex:** '{{root_folder}}/lib/src/{{feature_name}}/domain/entities'"
+          }
+        }
+      },
+      {
+        "title": "Clean Architecture Scaffolding",
+        "properties": {
+          "scaffolding.repository.author": {
+            "type": "string",
+            "default": "alcampospalacios",
+            "markdownDescription": "The name of repository owner"
+          }
+        }
+      },
+      {
+        "title": "Clean Architecture Scaffolding",
+        "properties": {
+          "scaffolding.repository.repo": {
+            "type": "string",
+            "default": "clean-architecture-scaffolding",
+            "markdownDescription": "The repository name"
+          }
+        }
+      },
+      {
+        "title": "Clean Architecture Scaffolding",
+        "properties": {
+          "scaffolding.repository.targetdir": {
+            "type": "string",
+            "default": ".my_templates/default_templates/",
+            "markdownDescription": "The folder where your custom templates in"
+          }
+        }
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "tdd-clean-architecture.createInitials",
+          "group": "1_clean_architecture_scaffolding@1"
+        },
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "tdd-clean-architecture.createFolders",
+          "group": "1_clean_architecture_scaffolding@2"
+        },
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "tdd-clean-architecture.createUsecase",
+          "group": "1_clean_architecture_scaffolding@2"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "tdd-clean-architecture.createInitials",
+        "title": "TDD Clean Arch.: Create initial needs",
+        "category": "TDD Clean Arch"
+      },
+      {
+        "command": "tdd-clean-architecture.createFolders",
+        "title": "TDD Clean Arch.: Create folders",
+        "category": "TDD Clean Arch"
+      },
+      {
+        "command": "tdd-clean-architecture.createUsecase",
+        "title": "TDD Clean Arch.: New usecase",
+        "category": "TDD Clean Arch"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/js-yaml": "^3.12.1",
+    "@types/lodash": "^4.14.121",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.70.0",
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "@typescript-eslint/parser": "^5.31.0",
+    "@vscode/test-electron": "^2.1.5",
+    "eslint": "^8.20.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.0.0",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "axios": "^1.1.0",
+    "change-case": "^4.1.2",
+    "gh-retrieve": "^1.1.2",
+    "lodash": "^4.17.21"
+  }
+}

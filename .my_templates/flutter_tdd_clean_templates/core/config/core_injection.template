@@ -1,0 +1,65 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../api/api_request_handler.dart';
+import '../api/dio_interceptor.dart';
+import '../storage/local_storage_handler.dart';
+
+/// Initializes the **core dependencies** of the application.
+///
+/// This function configures and registers external dependencies
+/// and shared services that are used across multiple features.
+/// It sets up HTTP networking, local storage, and secure storage
+/// using [GetIt] as the dependency injection container.
+///
+/// ### Registered Dependencies
+///
+/// - **External**
+///   - [SharedPreferences] → persistent key-value storage.
+///   - [FlutterSecureStorage] → secure storage for sensitive data.
+///   - [Dio] → HTTP client with custom configuration and [DioInterceptor].
+///
+/// - **Core Services**
+///   - [IApiRequestHandler] → implemented by [ApiRequestHandler],
+///     responsible for managing network requests.
+///   - [ILocalStorageHandler] → implemented by [LocalStorageHandler],
+///     responsible for abstracting access to local and secure storage.
+///
+/// ### Example
+/// ```dart
+/// void main() async {
+///   WidgetsFlutterBinding.ensureInitialized();
+///   await initCore();
+///   runApp(const MyApp());
+/// }
+/// ```
+Future<void> initCore() async {
+  var options = BaseOptions(
+    headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+    baseUrl: 'http://127.0.0.1:8000',
+    connectTimeout: const Duration(seconds: 120),
+    receiveTimeout: const Duration(minutes: 120),
+  );
+
+  final sl = GetIt.instance;
+
+  // External dependencies (shared across features)
+  final sharedPreferences = await SharedPreferences.getInstance();
+  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+
+  sl.registerLazySingleton(() => sharedPreferences);
+  sl.registerLazySingleton(() => secureStorage);
+
+  sl.registerLazySingleton(() => DioInterceptor(sharedPreferences: sl()));
+  Dio dio = Dio(options);
+  dio.interceptors.add(sl<DioInterceptor>());
+  sl.registerLazySingleton(() => dio);
+
+  // Core services
+  sl.registerLazySingleton<IApiRequestHandler>(() => ApiRequestHandler(dio: sl()));
+  sl.registerLazySingleton<ILocalStorageHandler>(
+    () => LocalStorageHandler(sharedPreferences: sl(), secureStorage: sl()),
+  );
+}

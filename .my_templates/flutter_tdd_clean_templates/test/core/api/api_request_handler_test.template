@@ -1,0 +1,137 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:gymtor/core/api/api_request_handler.dart';
+import 'package:gymtor/core/errors/exceptions.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockDio extends Mock implements Dio {}
+
+/// Fake class for [FormData] that acts as a fallback value during mock calls.
+class FakeFormData extends Fake implements FormData {}
+
+void main() {
+  late Dio dio;
+  late Dio mockDioForDifferentBaseUrl;
+  late ApiRequestHandler apiRequestHandler;
+
+  setUp(() {
+    dio = MockDio();
+    mockDioForDifferentBaseUrl = MockDio();
+
+    // Factory function que retorna nuestro mock
+    Dio dioFactory(BaseOptions options) => mockDioForDifferentBaseUrl;
+    apiRequestHandler = ApiRequestHandler(dio: dio, dioFactory: dioFactory);
+    registerFallbackValue(FakeFormData());
+  });
+
+  group("[post]", () {
+    test("Should call the [ApiRequestHandler.post] and complete successfully", () async {
+      // Arrange
+      when(
+        () => dio.post(any(), data: any(named: 'data')),
+      ).thenAnswer((_) async => Response(data: 'Success', statusCode: 200, requestOptions: RequestOptions()));
+
+      // Act
+      final result = await apiRequestHandler.post(url: 'url', data: FormData());
+
+      // Assert
+      expect(result.statusCode, 200);
+      verify(() => dio.post(any(), data: any(named: 'data'))).called(1);
+      verifyNoMoreInteractions(dio);
+    });
+    test("Should call the [ApiRequestHandler.post] and complete with a Exception", () async {
+      // Arrange
+      when(() => dio.post(any(), data: any(named: 'data'))).thenThrow(Exception);
+
+      // Act & Assert
+      /// Instead of returning a value, this test ensures that
+      /// the method under test *throws* a [ServerException].
+      ///
+      /// `expect(..., throwsA(...))` is the recommended way in Dart tests
+      /// to assert that an asynchronous function throws an exception.
+      ///
+      /// Using this pattern, the test verifies:
+      /// - The correct exception type is thrown ([ServerException]).
+      /// - The exception is propagated as expected and not swallowed.
+      expect(() async => await apiRequestHandler.post(url: 'url', data: FormData()), throwsA(isA<ServerException>()));
+    });
+  });
+  group("[get]", () {
+    test("Should call the [ApiRequestHandler.get] and complete successfully", () async {
+      // Arrange
+      when(
+        () => dio.get(any()),
+      ).thenAnswer((_) async => Response(data: 'Success', statusCode: 200, requestOptions: RequestOptions()));
+
+      // Act
+      final result = await apiRequestHandler.get(url: 'url');
+
+      // Assert
+      expect(result.statusCode, 200);
+      verify(() => dio.get(any())).called(1);
+      verifyNoMoreInteractions(dio);
+    });
+    test("Should call the [ApiRequestHandler.get] and complete with a Exception", () async {
+      // Arrange
+      when(() => dio.get(any())).thenThrow(Exception);
+
+      // Act & Assert
+      /// Instead of returning a value, this test ensures that
+      /// the method under test *throws* a [ServerException].
+      ///
+      /// `expect(..., throwsA(...))` is the recommended way in Dart tests
+      /// to assert that an asynchronous function throws an exception.
+      ///
+      /// Using this pattern, the test verifies:
+      /// - The correct exception type is thrown ([ServerException]).
+      /// - The exception is propagated as expected and not swallowed.
+      expect(() async => await apiRequestHandler.get(url: 'url'), throwsA(isA<ServerException>()));
+    });
+  });
+  group("[postDifferentBaseUrl]", () {
+    test("Should call the [ApiRequestHandler.postDifferentBaseUrl] and complete successfully", () async {
+      // Arrange
+      when(
+        () => mockDioForDifferentBaseUrl.post(any(), data: any(named: 'data')),
+      ).thenAnswer((_) async => Response(data: 'Success', statusCode: 200, requestOptions: RequestOptions()));
+
+      // Act
+      final result = await apiRequestHandler.postDifferentBaseUrl(
+        baseUrl: 'http://localhost:3000',
+        url: 'url',
+        data: FormData(),
+      );
+
+      // Assert
+      expect(result.statusCode, 200);
+      verify(() => mockDioForDifferentBaseUrl.post(any(), data: any(named: 'data'))).called(1);
+      verifyNoMoreInteractions(mockDioForDifferentBaseUrl);
+    });
+    test("Should call the [ApiRequestHandler.postDifferentBaseUrl] and complete with a Exception", () async {
+      // Arrange
+      when(() => mockDioForDifferentBaseUrl.post(any(), data: any(named: 'data'))).thenThrow(Exception);
+
+      // Act & Assert
+      /// Instead of returning a value, this test ensures that
+      /// the method under test *throws* a [ServerException].
+      ///
+      /// `expect(..., throwsA(...))` is the recommended way in Dart tests
+      /// to assert that an asynchronous function throws an exception.
+      ///
+      /// Using this pattern, the test verifies:
+      /// - The correct exception type is thrown ([ServerException]).
+      /// - The exception is propagated as expected and not swallowed.
+      expect(
+        () async => await apiRequestHandler.postDifferentBaseUrl(
+          baseUrl: 'http://localhost:3000',
+          url: 'url',
+          data: FormData(),
+        ),
+        throwsA(isA<ServerException>()),
+      );
+
+      verify(() => mockDioForDifferentBaseUrl.post(any(), data: any(named: 'data'))).called(1);
+      verifyNoMoreInteractions(mockDioForDifferentBaseUrl);
+    });
+  });
+}

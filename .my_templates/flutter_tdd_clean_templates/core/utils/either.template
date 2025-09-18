@@ -1,0 +1,83 @@
+import 'package:equatable/equatable.dart';
+
+/// A generic representation of a value that can be one of two possible types.
+///
+/// - `Left<L, R>` usually represents an error or failure case.
+/// - `Right<L, R>` usually represents a successful result.
+///
+/// This is similar to the `Either` type from the `dartz` package,
+/// but implemented with Dart sealed classes and without external dependencies.
+///
+/// ## Example usage:
+///
+/// ```dart
+/// Future<Either<Failure, String>> getUserName() async {
+///   try {
+///     final name = "Doe";
+///     return Right(name);
+///   } catch (e) {
+///     return Left(Failure(message: e.toString()));
+///   }
+/// }
+///
+/// final result = await getUserName();
+///
+/// // Using fold
+/// result.fold(
+///   onLeft: (f) => print("Error: ${f.message}"),
+///   onRight: (name) => print("Hello $name"),
+/// );
+///
+/// // Direct access
+/// final failure = result.getLeftOrNull();
+/// final value = result.getRightOrNull();
+/// ```
+sealed class Either<L, R> extends Equatable {
+  const Either();
+
+  /// Executes the corresponding function depending on the contained value:
+  ///
+  /// - If this is a `Left`, calls [onLeft].
+  /// - If this is a `Right`, calls [onRight].
+  T fold<T>({required T Function(L left) onLeft, required T Function(R right) onRight});
+
+  /// Returns `true` if this is a `Left`.
+  bool get isLeft => this is Left<L, R>;
+
+  /// Returns `true` if this is a `Right`.
+  bool get isRight => this is Right<L, R>;
+
+  /// Returns the value if this is a `Left`, otherwise `null`.
+  L? getLeftOrNull() => this is Left<L, R> ? (this as Left<L, R>).value : null;
+
+  /// Returns the value if this is a `Right`, otherwise `null`.
+  R? getRightOrNull() => this is Right<L, R> ? (this as Right<L, R>).value : null;
+}
+
+/// Represents the "Left" case (commonly used for errors or failures).
+class Left<L, R> extends Either<L, R> {
+  /// The value contained in this `Left`.
+  final L value;
+
+  const Left(this.value);
+
+  @override
+  T fold<T>({required T Function(L left) onLeft, required T Function(R right) onRight}) => onLeft(value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
+/// Represents the "Right" case (commonly used for successful values).
+class Right<L, R> extends Either<L, R> {
+  /// The value contained in this `Right`.
+  final R value;
+
+  const Right(this.value);
+
+  @override
+  T fold<T>({required T Function(L left) onLeft, required T Function(R right) onRight}) => onRight(value);
+
+  @override
+  List<Object?> get props => [value];
+}

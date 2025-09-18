@@ -1,0 +1,127 @@
+import 'package:dio/dio.dart';
+
+import 'handle_exception.dart';
+
+/// Interface that defines a contract for handling HTTP requests
+/// with consistent exception handling across the application.
+///
+/// This abstraction allows:
+/// - Centralized exception handling
+/// - Flexible header configuration
+/// - Multiple types of HTTP requests
+///
+/// By depending on this interface instead of a concrete implementation,
+/// the codebase becomes easier to test and extend.
+abstract class IApiRequestHandler {
+  const IApiRequestHandler();
+
+  /// Performs a POST request with form data (FormData).
+  ///
+  /// **Typical usage:** File uploads, sending forms with images
+  ///
+  /// **Parameters:**
+  /// - [url]: Endpoint where the POST request will be sent
+  /// - [data]: Form data that will be sent in the request body
+  /// - [headers]: Optional headers that will override default headers
+  ///
+  /// **Returns:** [Response] with the server response
+  ///
+  /// **Throws:** [ServerException] if any error occurs during the request
+  Future<Response> post({required String url, required FormData data, Map<String, dynamic>? headers});
+
+  /// Performs a GET request to retrieve data from the server.
+  ///
+  /// **Typical usage:** Fetching user data, retrieving lists, getting configuration
+  ///
+  /// **Parameters:**
+  /// - [url]: Endpoint from which data will be retrieved
+  /// - [headers]: Optional headers that will override default headers
+  ///
+  /// **Returns:** [Response] with the server response containing requested data
+  ///
+  /// **Throws:** [ServerException] if any error occurs during the request
+  Future<Response> get({required String url, Map<String, dynamic>? headers});
+
+  /// Performs a POST request with a different base URL than the configured Dio instance.
+  ///
+  /// **Typical usage:** Making requests to external APIs, third-party services,
+  /// or different environments (staging, production) within the same app
+  ///
+  /// **Parameters:**
+  /// - [baseUrl]: Base URL where the POST request will be sent
+  /// - [url]: Endpoint where the POST request will be sent
+  /// - [data]: Data that will be sent in the request body (can be Map, String, etc.)
+  /// - [headers]: Optional headers that will override default headers
+  ///
+  /// **Returns:** [Response] with the server response
+  ///
+  /// **Throws:** [ServerException] if any error occurs during the request
+  ///
+  /// **Note:** This method creates a new Dio instance with its own configuration,
+  /// including custom timeouts (15 seconds for both connection and receive).
+  Future<Response> postDifferentBaseUrl({
+    required String baseUrl,
+    required String url,
+    Object? data,
+    Map<String, dynamic>? headers,
+  });
+}
+
+class ApiRequestHandler implements IApiRequestHandler {
+  const ApiRequestHandler({required Dio dio, this.dioFactory}) : _dio = dio;
+
+  final Dio _dio;
+  final Dio Function(BaseOptions)? dioFactory;
+
+  @override
+  Future<Response> post({required String url, required FormData data, Map<String, dynamic>? headers}) async {
+    try {
+      if (headers != null) {
+        _dio.options.headers = headers;
+      }
+      return await _dio.post(url, data: data);
+    } catch (e) {
+      throw HandleException.handlerException(e);
+    }
+  }
+
+  @override
+  Future<Response> get({required String url, Map<String, dynamic>? headers}) async {
+    try {
+      if (headers != null) {
+        _dio.options.headers = headers;
+      }
+      return await _dio.get(url);
+    } catch (e) {
+      throw HandleException.handlerException(e);
+    }
+  }
+
+  @override
+  Future<Response> postDifferentBaseUrl({
+    required String baseUrl,
+    required String url,
+    Object? data,
+    Map<String, dynamic>? headers,
+  }) async {
+    try {
+      final options = BaseOptions(
+        baseUrl: baseUrl,
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
+      );
+
+      // Use factory if provided, otherwise create new Dio instance
+      final dioInstance = dioFactory?.call(options) ?? Dio(options);
+      // dio.interceptors.add(GlobalDI.getIt<DioInterceptor>());
+
+      if (headers != null) {
+        dioInstance.options.headers = headers;
+      }
+      return await dioInstance.post(url, data: data);
+    } catch (e) {
+      throw HandleException.handlerException(e);
+    }
+  }
+}

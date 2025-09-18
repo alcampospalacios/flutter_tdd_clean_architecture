@@ -1,0 +1,34 @@
+import 'package:get_it/get_it.dart';
+
+import '../core/config/core_injection.dart';
+// import '../src/authentication/config/authentication_injection.dart';
+
+/// Global dependency injection initializer.
+///
+/// This function bootstraps the application’s dependency graph
+/// by registering all core services and feature-specific modules
+/// into the [GetIt] service locator.
+///
+/// The initialization order is important:
+/// 1. **Core** → Registers shared dependencies such as networking,
+///    storage, and other cross-cutting services.
+/// 2. **Features** → Registers feature-specific datasources,
+///    repositories, use cases, and presentation layer components.
+///
+/// ## Example
+/// ```dart
+/// void main() async {
+///   WidgetsFlutterBinding.ensureInitialized();
+///   await init();
+///   runApp(const MyApp());
+/// }
+/// ```
+final sl = GetIt.instance;
+
+Future<void> init() async {
+  // 1. Init core (shared dependencies)
+  await initCore();
+
+  // 2. Init features (order may matter if there are dependencies)
+  // await initAuthFeature();
+}
