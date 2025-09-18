@@ -1,312 +1,266 @@
-import { readFileSync, writeFile } from "fs";
+import { readFileSync } from "fs";
 import { Uri, window } from "vscode";
 import * as utils from "../utils/tools";
 import fs = require("fs");
 import { dirname } from "path";
 
 export async function createInitials(uri: Uri) {
-  //Get the keywords values 
-
   const clickedFolder = utils.getClickedFolder(uri);
   let rootFolder = utils.getRootFolder(uri);
-  rootFolder = rootFolder.replaceAll("\\", "/");  
-  const filePathConfigList = await utils.getExtensionFileTemplates();
-  const usecaseName = await getUsecaseName();
+  rootFolder = rootFolder.replaceAll("\\", "/");
   let packageName = await utils.getPackageName(uri);
   packageName = packageName.replaceAll("\\", "/");
 
-  //Se não informar o usecaseName não deve continuar
-  if (!usecaseName) {
-    return;
+  const templateBaseFolder = `${rootFolder}/.my_templates/flutter_tdd_clean_templates`;
+
+  if (!fs.existsSync(templateBaseFolder)) {
+    const YES_NO = await window.showWarningMessage(
+      "The '.my_templates/flutter_tdd_clean_templates' folder was not found!\nDo you want to download the templates from the repository?",
+      "Yes",
+      "No"
+    );
+    if (YES_NO === "Yes") {
+      await downloadInitialTemplates(uri);
+      window.showInformationMessage("Templates downloaded successfully! Please run the command again.");
+      return;
+    } else {
+      window.showErrorMessage("Cannot continue without templates!");
+      return;
+    }
   }
 
-  if (filePathConfigList && Array.isArray(filePathConfigList)) {
-    const templatesList = getTemplatesFileList(filePathConfigList);
-    let featureName: string;
-    
-    try {
-      let templatesMap = new Map<string, string>();
+  try {
+    // Copy templates from specific initial folders: config, core, test
+    const initialFolders = ['config', 'core', 'test'];
+    let totalFilesCreated = 0;
 
-      templatesList.forEach(async (element: string) => {
-        featureName = getFeatureName(clickedFolder, element, uri);        
-        if (!featureName) {
-          return;
-        }
-
-        const templateFileName = element.substring(
-          element.lastIndexOf("/") + 1,
-          element.length
-          );
-        
-    
-        const pathFileName = element
-          .replaceName("{{feature_name}}", featureName)
-          .replaceName("{{custom_folder}}", clickedFolder)
-          .replaceName("{{usecase_name}}", usecaseName)
-          .replaceName("{{package_name}}", packageName)
-          .replaceName("{{root_folder}}", rootFolder)
-
-          .replaceName("{{feature_name.lowerCase}}", featureName)
-          .replaceName("{{custom_folder.lowerCase}}", clickedFolder)
-          .replaceName("{{usecase_name.lowerCase}}", usecaseName)
-          .replaceName("{{package_name.lowerCase}}", packageName)
-          .replaceName("{{root_folder.lowerCase}}", rootFolder)
-
-          .replaceName("{{feature_name.upperCase}}", featureName)
-          .replaceName("{{custom_folder.upperCase}}", clickedFolder)
-          .replaceName("{{usecase_name.upperCase}}", usecaseName)
-          .replaceName("{{package_name.upperCase}}", packageName)
-          .replaceName("{{root_folder.upperCase}}", rootFolder)
-
-          .replaceName("{{feature_name.snakeCase}}", featureName)
-          .replaceName("{{custom_folder.snakeCase}}", clickedFolder)
-          .replaceName("{{usecase_name.snakeCase}}", usecaseName)
-          .replaceName("{{package_name.snakeCase}}", packageName)
-          .replaceName("{{root_folder.snakeCase}}", rootFolder)
-
-          .replaceName("{{feature_name.pascalCase}}", featureName)
-          .replaceName("{{custom_folder.pascalCase}}", clickedFolder)
-          .replaceName("{{usecase_name.pascalCase}}", usecaseName)
-          .replaceName("{{package_name.pascalCase}}", packageName)
-          .replaceName("{{root_folder.pascalCase}}", rootFolder)
-
-          .replaceName("{{feature_name.camelCase}}", featureName)
-          .replaceName("{{custom_folder.camelCase}}", clickedFolder)
-          .replaceName("{{usecase_name.camelCase}}", usecaseName)
-          .replaceName("{{package_name.camelCase}}", packageName)
-          .replaceName("{{root_folder.camelCase}}", rootFolder)
-
-          .replaceAll(".template", ".dart");
-
-
-
-        let templateFile = `${rootFolder}/.my_templates/${templateFileName}`;
-        let templateContent = readFileSync(templateFile, "utf8");
-
-        if (templateContent && templateContent !== null) {
-          templatesMap.set(pathFileName, templateContent);
-        }
-      });
-
-      if (templatesMap) {
-        templatesMap.forEach((content, filePath) => {
-          content = content.replaceName("{{feature_name}}", featureName!);
-          content = content.replaceName("{{custom_folder}}", clickedFolder);
-          content = content.replaceName("{{usecase_name}}", usecaseName);
-          content = content.replaceName("{{package_name}}", packageName);
-          content = content.replaceName("{{root_folder}}", rootFolder);
-
-          content = content.replaceName(
-            "{{feature_name.lowerCase}}",
-            featureName!
-          );
-          content = content.replaceName(
-            "{{custom_folder.lowerCase}}",
-            clickedFolder
-          );
-          content = content.replaceName(
-            "{{usecase_name.lowerCase}}",
-            usecaseName
-          );
-          content = content.replaceName(
-            "{{package_name.lowerCase}}",
-            packageName
-          );
-          content = content.replaceName(
-            "{{root_folder.lowerCase}}",
-            rootFolder
-          );
-
-          content = content.replaceName(
-            "{{feature_name.upperCase}}",
-            featureName!
-          );
-          content = content.replaceName(
-            "{{custom_folder.upperCase}}",
-            clickedFolder
-          );
-          content = content.replaceName(
-            "{{usecase_name.upperCase}}",
-            usecaseName
-          );
-          content = content.replaceName(
-            "{{package_name.upperCase}}",
-            packageName
-          );
-          content = content.replaceName(
-            "{{root_folder.upperCase}}",
-            rootFolder
-          );
-
-          content = content.replaceName(
-            "{{feature_name.snakeCase}}",
-            featureName!
-          );
-          content = content.replaceName(
-            "{{custom_folder.snakeCase}}",
-            clickedFolder
-          );
-          content = content.replaceName(
-            "{{usecase_name.snakeCase}}",
-            usecaseName
-          );
-          content = content.replaceName(
-            "{{package_name.snakeCase}}",
-            packageName
-          );
-          content = content.replaceName(
-            "{{root_folder.snakeCase}}",
-            rootFolder
-          );
-
-          content = content.replaceName(
-            "{{feature_name.pascalCase}}",
-            featureName!
-          );
-          content = content.replaceName(
-            "{{custom_folder.pascalCase}}",
-            clickedFolder
-          );
-          content = content.replaceName(
-            "{{usecase_name.pascalCase}}",
-            usecaseName
-          );
-          content = content.replaceName(
-            "{{package_name.pascalCase}}",
-            packageName
-          );
-          content = content.replaceName(
-            "{{root_folder.pascalCase}}",
-            rootFolder
-          );
-
-          content = content.replaceName(
-            "{{feature_name.camelCase}}",
-            featureName!
-          );
-          content = content.replaceName(
-            "{{custom_folder.camelCase}}",
-            clickedFolder
-          );
-          content = content.replaceName(
-            "{{usecase_name.camelCase}}",
-            usecaseName
-          );
-          content = content.replaceName(
-            "{{package_name.camelCase}}",
-            packageName
-          );
-          content = content.replaceName(
-            "{{root_folder.camelCase}}",
-            rootFolder
-          );
-
-          templatesMap.set(filePath, content);
-
-          writeFileExt(filePath, content, );
-        });
+    for (const folder of initialFolders) {
+      const folderPath = `${templateBaseFolder}/${folder}`;
+      if (fs.existsSync(folderPath)) {
+        const filesCreated = await copyInitialTemplatesFromFolder(
+          folderPath, 
+          rootFolder, 
+          clickedFolder, 
+          packageName,
+          folder
+        );
+        totalFilesCreated += filesCreated;
+        window.showInformationMessage(`✅ Created ${filesCreated} files from ${folder} templates`);
+      } else {
+        window.showWarningMessage(`⚠️ Folder ${folder} not found in templates`);
       }
-    } catch (error) {
-      console.log("Error", error);
-      throw error;
     }
+
+    if (totalFilesCreated > 0) {
+      window.showInformationMessage(`🎉 Initial setup completed! ${totalFilesCreated} files created successfully!`);
+    } else {
+      window.showWarningMessage("No template files were found to create.");
+    }
+  } catch (error) {
+    console.log("Error creating initial templates:", error);
+    window.showErrorMessage(`❌ Error creating initial templates: ${error}`);
+    throw error;
   }
 }
 
-function writeFileExt(path: string, contents: string) {
- fs.mkdir(dirname(path), { recursive: true }, function (err: any) {
-    if (err) return err;
+async function copyInitialTemplatesFromFolder(
+  templateFolder: string,
+  rootFolder: string,
+  clickedFolder: string,
+  packageName: string,
+  folderType: string
+): Promise<number> {
+  // Get all template files recursively from this specific folder
+  const templateFiles = getAllTemplateFiles(templateFolder);
+  let filesCreated = 0;
+  
+  for (const templateFile of templateFiles) {
+    try {
+      // Get relative path from template folder (preserving subdirectory structure)
+      const relativePath = templateFile.replace(templateFolder + "/", "");
+      
+      // Create destination path maintaining the folder structure
+      let destinationPath: string;
+      
+      if (folderType === 'config') {
+        // config/ templates go directly to lib/config/
+        destinationPath = `${rootFolder}/lib/config/${relativePath}`;
+      } else if (folderType === 'core') {
+        // core/ templates go to lib/core/ maintaining subdirectories
+        // Example: core/api/dio_interceptor.template -> lib/core/api/dio_interceptor.dart
+        destinationPath = `${rootFolder}/lib/core/${relativePath}`;
+      } else if (folderType === 'test') {
+        // test/ templates go to test/ maintaining subdirectories
+        // Example: test/core/api/api_request_handler_test.template -> test/core/api/api_request_handler_test.dart
+        destinationPath = `${rootFolder}/test/${relativePath}`;
+      } else {
+        // Default behavior - maintain original structure
+        destinationPath = `${rootFolder}/${folderType}/${relativePath}`;
+      }
+      
+      // Remove .template extension
+      destinationPath = destinationPath.replace(".template", "");
+      
+      // Replace placeholders in path
+      destinationPath = replacePlaceholdersInPath(destinationPath, {
+        custom_folder: clickedFolder,
+        package_name: packageName,
+        root_folder: rootFolder
+      });
 
-    fs.writeFile(path, contents,  "utf8" ,(error) => {
-      console.log("ErrorWriteFile ", error);
+      // Read template content
+      let templateContent = readFileSync(templateFile, "utf8");
+      
+      // Replace placeholders in content - including package references
+      templateContent = replacePlaceholdersInContent(templateContent, {
+        custom_folder: clickedFolder,
+        package_name: packageName,
+        root_folder: rootFolder
+      });
+
+      // Special handling for imports in Dart files
+      templateContent = fixDartImports(templateContent, packageName);
+
+      // Write the file
+      await writeFileExtPromise(destinationPath, templateContent);
+      filesCreated++;
+      console.log(`✅ Created: ${destinationPath}`);
+      
+    } catch (error) {
+      console.error(`❌ Error processing template ${templateFile}:`, error);
+      window.showErrorMessage(`Error processing template: ${templateFile}`);
+    }
+  }
+  
+  return filesCreated;
+}
+
+// Fix Dart imports to use the correct package name
+function fixDartImports(content: string, packageName: string): string {
+  // Replace hardcoded package references like 'package:gymtor/' with the actual package name
+  // This handles cases where templates might have specific package references
+  return content.replace(/package:gymtor\//g, `package:${packageName}/`);
+}
+
+function getAllTemplateFiles(dir: string): string[] {
+  const files: string[] = [];
+  
+  if (!fs.existsSync(dir)) {
+    return files;
+  }
+
+  const items = fs.readdirSync(dir);
+  
+  for (const item of items) {
+    const fullPath = `${dir}/${item}`;
+    const stat = fs.statSync(fullPath);
+    
+    if (stat.isDirectory()) {
+      files.push(...getAllTemplateFiles(fullPath));
+    } else if (item.endsWith('.template')) {
+      files.push(fullPath);
+    }
+  }
+  
+  return files;
+}
+
+function replacePlaceholdersInPath(path: string, placeholders: any): string {
+  let result = path;
+  
+  // Replace each placeholder with all its variants
+  Object.keys(placeholders).forEach(key => {
+    const value = placeholders[key];
+    result = result.replaceName(`{{${key}}}`, value);
+    result = result.replaceName(`{{${key}.lowerCase}}`, value);
+    result = result.replaceName(`{{${key}.upperCase}}`, value);
+    result = result.replaceName(`{{${key}.snakeCase}}`, value);
+    result = result.replaceName(`{{${key}.pascalCase}}`, value);
+    result = result.replaceName(`{{${key}.camelCase}}`, value);
+  });
+
+  return result;
+}
+
+function replacePlaceholdersInContent(content: string, placeholders: any): string {
+  let result = content;
+  
+  // Replace each placeholder with all its variants
+  Object.keys(placeholders).forEach(key => {
+    const value = placeholders[key];
+    result = result.replaceName(`{{${key}}}`, value);
+    result = result.replaceName(`{{${key}.lowerCase}}`, value);
+    result = result.replaceName(`{{${key}.upperCase}}`, value);
+    result = result.replaceName(`{{${key}.snakeCase}}`, value);
+    result = result.replaceName(`{{${key}.pascalCase}}`, value);
+    result = result.replaceName(`{{${key}.camelCase}}`, value);
+  });
+
+  return result;
+}
+
+function writeFileExt(path: string, contents: string) {
+  fs.mkdir(dirname(path), { recursive: true }, function (err: any) {
+    if (err) {
+      console.error("Error creating directory:", err);
+      return;
+    }
+
+    fs.writeFile(path, contents, "utf8", (error) => {
+      if (error) {
+        console.error("Error writing file:", path, error);
+      } else {
+        console.log("Created file:", path);
+      }
     });
   });
 }
 
-async function getUsecaseName(): Promise<string | undefined> {
-  const usecaseName = await window.showInputBox({
-    title: "Create Usecase",
-    prompt: "Usecase name? (please, prefer snake_case mode!)",
-    placeHolder: "Ex: get_products -> get_products_usecase",
-    validateInput: function (value: string) {
-      if (!value || value?.includes(" ")) {
-        return "Name is required! and spaces are not allowed!";
+// Promise version for better async handling
+function writeFileExtPromise(path: string, contents: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    fs.mkdir(dirname(path), { recursive: true }, function (err: any) {
+      if (err) {
+        console.error("Error creating directory:", err);
+        reject(err);
+        return;
       }
-    },
+
+      fs.writeFile(path, contents, "utf8", (error) => {
+        if (error) {
+          console.error("Error writing file:", path, error);
+          reject(error);
+        } else {
+          console.log("✅ Created file:", path);
+          resolve();
+        }
+      });
+    });
   });
-
-  return usecaseName;
 }
 
-function getTemplatesFileList(filePathConfig: Array<string>) {
-  const templatesList = filePathConfig.filter((element) => {
-    return element.endsWith(".template");
-  });
-  return templatesList;
-}
-
-function getFeatureName(
-  clickedFolder: string,
-  template: string,
-  uri: Uri
-): string {
-  let indexOfFeatureName = 0;
-  template = template.replaceName("{{root_folder}}", utils.getRootFolder(uri));
-  const templateArray = template.split("/");
-  const clickedArray = clickedFolder.split("/");
-  // TODO: check if the feature value is necessary
-  const featureName = templateArray.find(isFeature);
-  if (featureName) {
-    indexOfFeatureName = templateArray.indexOf(featureName, 3);    
-  }
-  if (indexOfFeatureName > 0) {
-    indexOfFeatureName = clickedArray.indexOf('domain');
-    return clickedArray[indexOfFeatureName-1];
-  } else {
-    return "";
-  }
-}
-
-function isFeature(item: string) {
-  return item.includes("feature_name");
-}
-
-export async function getTemplatesFile(uri: Uri) {
+async function downloadInitialTemplates(uri: Uri) {
   const rootFolder = utils.getRootFolder(uri);
-  const defaultTemplateFolder = `${rootFolder}/.my_templates`;
+  const defaultTemplateFolder = `${rootFolder}/.my_templates/flutter_tdd_clean_templates`;
 
   if (!fs.existsSync(defaultTemplateFolder)) {
-    fs.mkdirSync(defaultTemplateFolder);
+    fs.mkdirSync(defaultTemplateFolder, { recursive: true });
   }
 
-  const { recursiveDownload } = require("gh-retrieve");
+  try {
+    const { recursiveDownload } = require("gh-retrieve");
 
-  recursiveDownload({
-    author: await utils.getRepoAuthor(), //repository owner
-    repo: await utils.getRepoName(), //repository name
-    targetdir: await utils.getRepoFolder(), //target directory to download
-    outdir: defaultTemplateFolder, //directory to download in
-  }).catch((err: { stack: any }) => {
-    console.log(err.stack);
-  });
+    await recursiveDownload({
+      author: await utils.getRepoAuthor(), // repository owner
+      repo: await utils.getRepoName(), // repository name
+      targetdir: await utils.getRepoFolder(), // target directory to download
+      outdir: defaultTemplateFolder, // directory to download in
+    });
 
-  const baseUrl =
-    "https://raw.githubusercontent.com/euclidesgc/clean-architecture-scaffolding/main/.my_templates/default_templates/";
-
-  const templates = [
-    `${baseUrl}%7B%7Busecase_name.snakeCase%7D%7D_datasource.template`,
-    `${baseUrl}%7B%7Busecase_name.snakeCase%7D%7D_datasource_impl.template`,
-    `${baseUrl}%7B%7Busecase_name.snakeCase%7D%7D_repository.template`,
-    `${baseUrl}%7B%7Busecase_name.snakeCase%7D%7D_repository_impl.template`,
-    `${baseUrl}%7B%7Busecase_name.snakeCase%7D%7D_usecase.template`,
-  ];
-
-  templates.forEach((url) => {
-    const file = url
-      .replaceAll("%7B", "{")
-      .replaceAll("%7D", "}")
-      .substring(url.lastIndexOf("/"), url.length);
-
-    utils.donwloadTemplateFiles(`${defaultTemplateFolder}${file}`, url);
-  });
+    window.showInformationMessage("Templates downloaded successfully!");
+  } catch (err: any) {
+    console.log("Error downloading templates:", err.stack);
+    window.showErrorMessage(`Error downloading templates: ${err.message}`);
+    throw err;
+  }
 }

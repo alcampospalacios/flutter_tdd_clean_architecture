@@ -13,7 +13,7 @@
   "version": "0.1.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alcampospalacios/clean-architecture-scaffolding"
+    "url": "https://github.com/alcampospalacios/flutter_tdd_clean_architecture"
   },
   "engines": {
     "vscode": "^1.70.0"
