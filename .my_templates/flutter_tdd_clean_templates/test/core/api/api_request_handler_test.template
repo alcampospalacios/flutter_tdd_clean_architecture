@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gymtor/core/api/api_request_handler.dart';
-import 'package:gymtor/core/errors/exceptions.dart';
+
+import 'package:{{package_name}}/core/api/api_request_handler.dart';
+import 'package:{{package_name}}/core/errors/exceptions.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockDio extends Mock implements Dio {}
