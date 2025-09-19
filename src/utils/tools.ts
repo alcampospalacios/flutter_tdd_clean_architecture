@@ -110,6 +110,29 @@ export async function getUsecaseName(): Promise<string | undefined> {
 }
 
 /**
+ * 📝 HELPER FUNCTION: Get use case name (should be moved to shared utilities)
+ *
+ * This function should be accessible from the command registration,
+ * so you might want to move it to utils or make it available here.
+ */
+export async function getRepositoryName(): Promise<string | undefined> {
+  const repositoryName = await vscode.window.showInputBox({
+    title: 'Create Repository ',
+    prompt: 'Repository name? (prefer snake_case format!)',
+    placeHolder:
+      'Ex: authentication_repository, product_repository ... Normally you can use the name of the feature like feature: [exercise] then repository: [exercise_repository]',
+    validateInput: function (value: string) {
+      if (!value || value?.includes(' ')) {
+        return 'Name is required and spaces are not allowed!';
+      }
+      return null;
+    },
+  });
+
+  return repositoryName;
+}
+
+/**
  * 📥 LEGACY FUNCTION: Download templates (kept for compatibility)
  *
  * This function is kept for compatibility with previous versions,
