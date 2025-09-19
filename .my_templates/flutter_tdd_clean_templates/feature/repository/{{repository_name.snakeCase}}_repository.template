@@ -1,0 +1,19 @@
+import '../../../../core/utils/typedef.dart';
+
+/// Contract for {{repository_name.pascalCase}}Repository operations.
+///
+/// This repository defines the required methods for handling
+/// {{repository_name.pascalCase}}
+///
+/// Each method returns a [ResultFuture] containing:
+/// - a [Entity] on success, or
+/// - a [Failure] on error.
+
+abstract class I{{repository_name.pascalCase}}Repository {
+  const I{{repository_name.pascalCase}}Repository();
+
+  /// Returns a [ResultFuture] containing the success
+  /// if the credentials are valid, otherwise a failure.
+  ResultFuture<bool> login({required String email, required String password}); //! TODO: Replace by your own methods
+
+}

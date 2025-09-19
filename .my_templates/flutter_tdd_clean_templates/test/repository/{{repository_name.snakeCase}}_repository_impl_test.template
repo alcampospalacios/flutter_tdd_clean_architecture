@@ -1,0 +1,106 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:{{package_name}}/core/errors/exceptions.dart';
+import 'package:{{package_name}}/core/errors/failure.dart';
+import 'package:{{package_name}}/core/utils/either.dart';
+import 'package:{{package_name}}/src/{{feature_name}}/data/datasources/{{repository_name}}_remote_data_source.dart';
+import 'package:{{package_name}}/src/{{feature_name}}/data/repositories/{{repository_name}}_repository_impl.dart';
+import 'package:mocktail/mocktail.dart';
+
+/// Mock implementation of the remote data source
+class Mock{{repository_name.pascalCase}}RemoteDataSource extends Mock
+    implements I{{repository_name.pascalCase}}RemoteDataSource {}
+
+void main() {
+  // Dependencies
+  late I{{repository_name.pascalCase}}RemoteDataSource {{repository_name.pascalCase}}RemoteDataSource;
+
+  // System under test (SUT)
+  late {{repository_name.pascalCase}}RepositoryImpl {{repository_name.pascalCase}}RepositoryImpl;
+
+  // Dummy model returned by the remote data source
+  late Model tModel;
+
+  setUp(() {
+    {{repository_name.pascalCase}}RemoteDataSource = Mock{{repository_name.pascalCase}}RemoteDataSource();
+    {{repository_name.pascalCase}}RepositoryImpl = {{repository_name.pascalCase}}RepositoryImpl(
+      {{repository_name.pascalCase}}RemoteDataSource,
+    );
+    tModel = Model();
+  });
+
+  group('[login]', () {
+    test(
+      'Should call the [RemoteDataSource.login] and complete successfully',
+      () async {
+        // Arrange
+        // Stub the remote data source to return a valid model when called.
+        when(
+          () => {{repository_name.pascalCase}}RemoteDataSource.login(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => tModel);
+
+        // Act
+        // Call the repository method which internally delegates to the remote data source.
+        final result = await {{repository_name.pascalCase}}RepositoryImpl.login(
+          email: 'email',
+          password: 'password',
+        );
+
+        // Assert
+        // Verify that the repository returned the correct Right<Entity>
+        // and that the remote data source was called exactly once.
+        expect(result, equals(Right<Failure, Entity>(tModel)));
+        verify(
+          () => {{repository_name.pascalCase}}RemoteDataSource.login(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).called(1);
+        verifyNoMoreInteractions({{repository_name.pascalCase}}RemoteDataSource);
+      },
+    );
+
+    test(
+      'Should call the [RemoteDataSource.login] and return a Failure',
+      () async {
+        // Arrange
+        // Stub the remote data source to throw a ServerException instead of returning a model.
+        when(
+          () => {{repository_name.pascalCase}}RemoteDataSource.login(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(ServerException(message: 'Error', statusCode: 404));
+
+        // Act
+        // Call the repository method which should catch the exception
+        // and convert it into a Failure.
+        final result = await {{repository_name.pascalCase}}RepositoryImpl.login(
+          email: 'email',
+          password: 'password',
+        );
+
+        // Assert
+        // Verify that the repository returned the correct Left<Failure>
+        // and that the remote data source was called exactly once.
+        expect(
+          result,
+          equals(
+            Left<Failure, Entity>(
+              ServerFailure(message: 'Error', statusCode: 404),
+            ),
+          ),
+        );
+        verify(
+          () => {{repository_name.pascalCase}}RemoteDataSource.login(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).called(1);
+        verifyNoMoreInteractions({{repository_name.pascalCase}}RemoteDataSource);
+      },
+    );
+  });
+}

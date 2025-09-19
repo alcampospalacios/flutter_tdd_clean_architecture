@@ -1,0 +1,65 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:dio/dio.dart';
+
+import '../../../../core/api/api_request_handler.dart';
+import '../models/token_model.dart';
+
+/// Contract for remote {{repository_name}} operations.
+///
+/// Defines how the application communicates with external services
+/// (REST API, OAuth providers).
+///
+/// ## Responsibilities
+/// - Exposes methods for some request or action
+/// - Always returns a [Entity] upon success.
+///
+/// ## Relations
+/// - Used by [{{repository_name.pascalCase}}RepositoryImpl] to perform remote
+///   operations.
+/// - Returns [Model], which is a data-layer representation
+///   of the [Entity] entity in the domain layer.
+abstract class I{{repository_name.pascalCase}}RemoteDataSource {
+  const I{{repository_name.pascalCase}}RemoteDataSource();
+
+  /// Sends a `POST` request
+  /// and returns a [Model] if successful.
+  ///
+  /// Throws:
+  /// - [DioException] for network or HTTP errors.
+  /// - [ServerException] if the API returns an error response.
+  Future<Model> login({required String email, required String password});
+}
+
+/// Implementation of [I{{repository_name.pascalCase}}RemoteDataSource].
+///
+/// This class uses:
+/// - [IApiRequestHandler] to communicate with the backend API.
+///
+/// ## Key Details
+/// - For **email/password login**, sends credentials as a `FormData` object.
+///
+/// ## Relations
+/// - Returns [Model], which is later transformed into a domain-level
+///   [Entity] by the repository.
+/// - Injected into [{{repository_name.pascalCase}}RepositoryImpl].
+class {{repository_name.pascalCase}}RemoteDataSourceImpl extends I{{repository_name.pascalCase}}RemoteDataSource {
+  const {{repository_name.pascalCase}}RemoteDataSourceImpl(this._apiRequestHandler);
+
+  final IApiRequestHandler _apiRequestHandler;
+
+  @override
+  Future<Model> login({required String email, required String password}) async {
+    //! ************************ Replace by your own request *************************
+    try {
+      final response = await _apiRequestHandler.post(
+        url: '/auth/token',
+        data: FormData.fromMap({'email': email, 'password': password}),
+      );
+      return Model.fromJson(response.data);
+    //! ******************************************************************************
+    } catch (e) {
+      rethrow;
+    }
+  }
+}

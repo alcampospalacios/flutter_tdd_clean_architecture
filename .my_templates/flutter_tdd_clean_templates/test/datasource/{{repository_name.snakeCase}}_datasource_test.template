@@ -1,0 +1,119 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:{{package_name}}/core/api/api_request_handler.dart';
+import 'package:{{package_name}}/core/errors/exceptions.dart';
+import 'package:{{package_name}}/src/{{feature_name}}/data/datasources/{{repository_name}}_remote_data_source.dart';
+import 'package:mocktail/mocktail.dart';
+
+import '../../../../fixtures/fixture_reader.dart';
+
+/// Mock implementation of [IApiRequestHandler] used for isolating
+/// the `{{repository_name.pascalCase}}RemoteDataSourceImpl` from real network calls.
+class MockApiRequestHandler extends Mock implements IApiRequestHandler {}
+
+/// Fake class for [FormData] that acts as a fallback value during mock calls.
+class FakeFormData extends Fake implements FormData {}
+
+void main() {
+  late IApiRequestHandler apiRequestHandler;
+  late {{repository_name.pascalCase}}RemoteDataSourceImpl remoteDataSourceImpl;
+
+  setUp(() {
+    /// Create a new mock API request handler before each test.
+    apiRequestHandler = MockApiRequestHandler();
+
+    /// Inject the mock dependency into the remote data source.
+    remoteDataSourceImpl = {{repository_name.pascalCase}}RemoteDataSourceImpl(apiRequestHandler);
+
+    /// Register fallback values for parameters that might be used
+    /// in the mocked calls, such as [FormData].
+    registerFallbackValue(FakeFormData());
+  });
+
+  group('[login]', () {
+    test('Should call the [IApiRequestHandler.post] and complete successfully', () async {
+      // Arrange
+      /// Load fixture JSON for a user, representing a successful API response.
+      final tJsonStr = fixture('token.json'); //! TODO: Replace [token.json] by your own custom json response normally located on fixtures
+
+      /// Build the expected [Model] instance from the fixture.
+      final expected = Model.fromJson(tJsonStr);
+
+      /// Stub the [post] method to return a successful Dio [Response]
+      /// containing the same JSON string as [tJsonStr].
+      when(
+        () => apiRequestHandler.post(
+          url: any(named: 'url'),
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: tJsonStr,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: ''),
+        ),
+      );
+
+      // Act
+      /// Call the method under test with mock credentials.
+      final result = await remoteDataSourceImpl.login(
+        email: 'email',
+        password: 'password',
+      );
+
+      // Assert
+      /// Verify that the result matches the expected [UserModel].
+      expect(result, equals(expected));
+
+      /// Ensure that [post] was called exactly once with any valid arguments.
+      verify(
+        () => apiRequestHandler.post(
+          url: any(named: 'url'),
+          data: any(named: 'data'),
+        ),
+      ).called(1);
+
+      /// Confirm there were no other unexpected interactions with the mock.
+      verifyNoMoreInteractions(apiRequestHandler);
+    });
+
+    test('Should call the [IApiRequestHandler.post] and return a Failure', () async {
+      // Arrange
+      /// Stub the [post] method to throw a [ServerException],
+      /// simulating a failed network call.
+      when(
+        () => apiRequestHandler.post(
+          url: any(named: 'url'),
+          data: any(named: 'data'),
+        ),
+      ).thenThrow(ServerException(message: 'Error', statusCode: 500));
+
+      // Act & Assert
+      /// Instead of returning a value, this test ensures that
+      /// the method under test *throws* a [ServerException].
+      ///
+      /// `expect(..., throwsA(...))` is the recommended way in Dart tests
+      /// to assert that an asynchronous function throws an exception.
+      ///
+      /// Using this pattern, the test verifies:
+      /// - The correct exception type is thrown ([ServerException]).
+      /// - The exception is propagated as expected and not swallowed.
+      expect(
+        () async =>
+            await remoteDataSourceImpl.login(email: 'email', password: 'password'),
+        throwsA(isA<ServerException>()),
+      );
+
+      /// Verify that [post] was still called once even though it threw.
+      verify(
+        () => apiRequestHandler.post(
+          url: any(named: 'url'),
+          data: any(named: 'data'),
+        ),
+      ).called(1);
+
+      /// Confirm that there are no further interactions with the mock.
+      verifyNoMoreInteractions(apiRequestHandler);
+    });
+  });
+}

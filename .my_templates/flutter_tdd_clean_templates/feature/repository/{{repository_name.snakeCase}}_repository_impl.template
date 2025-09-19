@@ -1,0 +1,66 @@
+
+import '../../../../core/errors/exceptions.dart';
+import '../../../../core/errors/failure.dart';
+import '../../../../core/utils/either.dart';
+import '../../../../core/utils/typedef.dart';
+import '../../domain/repositories/{{repository_name}}_repository.dart';
+
+import '../datasources/{{repository_name}}_remote_data_source.dart';
+
+/// Implementation of [{{repository_name.pascalCase}}Repository].
+///
+/// This class coordinates between the remote data source
+/// ([I{{repository_name.pascalCase}}RemoteDataSource]) and the local data source
+///
+/// - For **remote request**, it communicates with APIs through the
+///   remote data source.
+///
+/// Errors thrown by the data sources are caught and mapped to
+/// [ServerFailure] to maintain a consistent error handling strategy
+/// across the domain layer.
+///
+/// ## Relations
+/// - **Domain Layer**:
+///   - Implements [{{repository_name.pascalCase}}Repository].
+///   - Returns [Entity] on success.
+///   - Wraps results in [ResultFuture] (`Either<Failure, Entity>`).
+/// - **Data Layer**:
+///   - Depends on [I{{repository_name.pascalCase}}RemoteDataSource] to perform
+///     network requests.
+///   - Depends on [I{{repository_name.pascalCase}}LocalDataSource] to persist any information.
+/// - **Core Layer**:
+///   - Converts [ServerException] into [ServerFailure].
+///
+/// ## Usage
+/// This repository is injected into use cases such as:
+/// - [LoginUsecase]
+///
+/// Example:
+/// ```dart
+/// final result = await authRepository.login(
+///   email: 'test@gmail.com',
+///   password: 'password',
+/// );
+///
+/// result.fold(
+///   (failure) => print('Login failed: ${failure.message}'),
+///   (success)   => print('Success: $success'),
+/// );
+/// ```
+class {{repository_name.pascalCase}}RepositoryImpl extends I{{repository_name.pascalCase}}Repository {
+  const {{repository_name.pascalCase}}RepositoryImpl(this._remoteDataSource);
+
+  final I{{repository_name.pascalCase}}RemoteDataSource _remoteDataSource;
+
+  //! ************************ Replace by your own request *************************
+  @override
+  ResultFuture<Entity> login({required String email, required String password}) async {
+    try {
+      final result = await _remoteDataSource.login(email: email, password: password);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure.fromException(e));
+    }
+  }
+  //! *****************************************************************************
+}
