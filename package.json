@@ -32,7 +32,8 @@
     "onCommand:tdd-clean-architecture.createInitials",
     "onCommand:tdd-clean-architecture.createRepository",
     "onCommand:tdd-clean-architecture.createFolders",
-    "onCommand:tdd-clean-architecture.createUsecase"
+    "onCommand:tdd-clean-architecture.createUsecase",
+    "onCommand:tdd-clean-architecture.createUsecaseNoParams"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -117,12 +118,17 @@
         {
           "when": "explorerResourceIsFolder",
           "command": "tdd-clean-architecture.createUsecase",
-          "group": "1_clean_architecture_scaffolding@2"
+          "group": "1_clean_architecture_scaffolding@3"
+        },
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "tdd-clean-architecture.createUsecaseNoParams",
+          "group": "1_clean_architecture_scaffolding@4"
         },
         {
           "when": "explorerResourceIsFolder",
           "command": "tdd-clean-architecture.createRepository",
-          "group": "1_clean_architecture_scaffolding@3"
+          "group": "1_clean_architecture_scaffolding@5"
         }
       ]
     },
@@ -139,7 +145,12 @@
       },
       {
         "command": "tdd-clean-architecture.createUsecase",
-        "title": "TDD Clean Arch.: New usecase",
+        "title": "TDD Clean Arch.: New usecase with params",
+        "category": "TDD Clean Arch"
+      },
+      {
+        "command": "tdd-clean-architecture.createUsecaseNoParams",
+        "title": "TDD Clean Arch.: New usecase without params",
         "category": "TDD Clean Arch"
       },
       {

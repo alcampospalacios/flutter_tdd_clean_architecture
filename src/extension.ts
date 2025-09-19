@@ -6,6 +6,7 @@ import { createUsecase } from './commands/create_usecase';
 import { createInitials } from './commands/create_initials';
 import { createRepository } from './commands/create_repository';
 import { getTemplatesFile, getUsecaseName } from './utils/tools';
+import { createUsecaseWithoutParams } from './commands/create_usecase_without_params';
 
 export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand(
@@ -44,6 +45,34 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   vscode.commands.registerCommand(
+    'tdd-clean-architecture.createUsecaseNoParams',
+    async (uri: vscode.Uri) => {
+      // Check if specific use case templates exist
+      if (await usecaseTemplatesOk(uri)) {
+        await createUsecaseWithoutParams(uri); // Pass the use case name
+      } else {
+        const YES_NO = await vscode.window.showWarningMessage(
+          'The use case templates were not found!\\nDo you want to download the templates from the repository?',
+          'Yes',
+          'No',
+        );
+
+        if (YES_NO === 'Yes') {
+          await getTemplatesFile(uri);
+          vscode.window.showInformationMessage(
+            'Templates downloaded! Please run the command again.',
+          );
+        } else {
+          vscode.window.showInformationMessage(
+            `Tip: Look for templates in github:\\nhttps://github.com/alcampospalacios/flutter_tdd_clean_templates/tree/main/.my_templates/flutter_tdd_clean_templates`,
+          );
+          vscode.window.showErrorMessage(`Cannot continue without templates!`);
+        }
+      }
+    },
+  );
+
+  vscode.commands.registerCommand(
     'tdd-clean-architecture.createInitials',
     async (uri: vscode.Uri) => {
       // Use the new createInitials function that handles all template files
@@ -59,54 +88,6 @@ export function activate(context: vscode.ExtensionContext) {
     },
   );
 
-  // async function templatesOk(uri: vscode.Uri): Promise<Boolean> {
-  //   const folderList = (await vscode.workspace
-  //     .getConfiguration('scaffolding')
-  //     .get('layers.templates')) as Array<string>;
-
-  //   const templateList = folderList.filter((element) => element.endsWith('.template'));
-
-  //   if (folderList.length <= 0 && templateList.length <= 0) {
-  //     return false;
-  //   }
-
-  //   const rootFolder = uri.path.substring(1, uri.path.indexOf('/lib'));
-  //   let fileName = '';
-
-  //   if (templateList && templateList.length > 0) {
-  //     for (const key in templateList) {
-  //       if (Object.prototype.hasOwnProperty.call(templateList, key)) {
-  //         const element = templateList[key];
-
-  //         let fileName = element.substring(element.lastIndexOf('/') + 1, element.length);
-
-  //         const templateFile = `${rootFolder}/.my_templates/flutter_tdd_clean_templates/${fileName}`;
-  //         if (!fs.existsSync(templateFile)) {
-  //           return false;
-  //         }
-  //       }
-  //     }
-  //   } else {
-  //     return false;
-  //   }
-
-  //   return true;
-  // }
-
-  /**
-   * 🔍 FUNCTION: Check if use case templates exist
-   *
-   * This function validates that the specific use case templates exist
-   * in the new organized folder structure before attempting to create a use case.
-   *
-   * New template locations:
-   * - Use Case: .my_templates/flutter_tdd_clean_templates/feature/usecase/params/{usecase_name}_usecase.template
-   * - Test: .my_templates/flutter_tdd_clean_templates/test/usecase/params/{usecase_name}_usecase_test.template
-   *
-   * @param uri - VSCode URI to get the root folder
-   * @param usecaseName - Name of the use case to check templates for
-   * @returns Promise<boolean> - true if templates exist, false otherwise
-   */
   async function usecaseTemplatesOk(uri: vscode.Uri): Promise<boolean> {
     try {
       // Get the root folder path
