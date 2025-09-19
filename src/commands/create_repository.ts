@@ -56,7 +56,7 @@ export async function createRepository(uri: Uri) {
       },
       {
         templatePath: `${templateBaseFolder}/feature/datasource/{{repository_name.snakeCase}}_datasource.template`,
-        destinationPath: `${rootFolder}/lib/src/${featureName}/data/datasources/${repositoryName}_data_source.dart`,
+        destinationPath: `${rootFolder}/lib/src/${featureName}/data/datasources/${repositoryName}_remote_data_source.dart`,
         type: 'datasource',
       },
 
@@ -67,7 +67,7 @@ export async function createRepository(uri: Uri) {
       },
       {
         templatePath: `${templateBaseFolder}/test/datasource/{{repository_name.snakeCase}}_datasource_test.template`,
-        destinationPath: `${rootFolder}/test/src/${featureName}/data/datasources/${repositoryName}_data_source_test.dart`,
+        destinationPath: `${rootFolder}/test/src/${featureName}/data/datasources/${repositoryName}_remote_data_source_test.dart`,
         type: 'test',
       },
     ];
