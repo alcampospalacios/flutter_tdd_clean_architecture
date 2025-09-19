@@ -1,0 +1,41 @@
+import 'package:equatable/equatable.dart';
+import '../../../../core/usecase/usecase_base.dart';
+import '../../../../core/utils/typedef.dart';
+
+/// A use case responsible for handling a specific task must be only one reponsability
+/// according to **SPR** principle  
+///
+/// This class follows the **Clean Architecture** pattern, where
+/// business logic is encapsulated in use cases. It delegates the
+/// {{usecase_name.pascalCase}} process to the [IRepository].
+///
+/// ## Responsibilities
+/// - Accepts [NoParams] to declare that the usecase no contain params.
+/// - Calls the [IRepository.methods].
+/// - Returns a [ValidResponse] wrapped inside a [ResultFuture].
+///
+/// ## Example
+/// ```dart
+/// final usecase = {{usecase_name.pascalCase}}Usecase(authRepository);
+/// final result = await usecase(const NoParams());
+///
+/// result.fold(
+///   (failure) => print('Login failed: ${failure.message}'),
+///   (_) => print('Access token: ${token.value}'),
+/// );
+/// ```
+class {{usecase_name.pascalCase}}Usecase extends UsecaseBaseWithoutParams<void> { // ! TODO: Replace [void] by your own entity or leave it if is applied
+  /// Creates a new instance of [{{usecase_name.pascalCase}}Usecase].
+  ///
+  /// Requires an [IRepository] to perform the actual call.
+  const {{usecase_name.pascalCase}}Usecase(this._repository);
+
+  final IRepository _repository;
+
+  @override
+  ResultFuture<void> call(Params params) async {
+  //  Example
+  //  return await _repository.login();
+  }
+}
+

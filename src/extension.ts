@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { createFolders } from './commands/create_folders';
 import { createUsecase, getTemplatesFile } from './commands/create_usecase';
 import { createInitials } from './commands/create_initials';
+import { createRepository } from './commands/create_repository';
 
 export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand(
@@ -45,6 +46,14 @@ export function activate(context: vscode.ExtensionContext) {
     },
   );
 
+  vscode.commands.registerCommand(
+    'tdd-clean-architecture.createRepository',
+    async (uri: vscode.Uri) => {
+      // Use the new createInitials function that handles all template files
+      await createRepository(uri);
+    },
+  );
+
   async function templatesOk(uri: vscode.Uri): Promise<Boolean> {
     const folderList = (await vscode.workspace
       .getConfiguration('scaffolding')
@@ -66,7 +75,7 @@ export function activate(context: vscode.ExtensionContext) {
 
           let fileName = element.substring(element.lastIndexOf('/') + 1, element.length);
 
-          const templateFile = `${rootFolder}/.my_templates/${fileName}`;
+          const templateFile = `${rootFolder}/.my_templates/flutter_tdd_clean_templates/${fileName}`;
           if (!fs.existsSync(templateFile)) {
             return false;
           }

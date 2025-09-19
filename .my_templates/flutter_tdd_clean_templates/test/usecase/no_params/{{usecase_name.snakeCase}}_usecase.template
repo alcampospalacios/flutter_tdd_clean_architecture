@@ -1,0 +1,63 @@
+// Unit test for [{{usecase_name.pascalCase}}].
+//
+// This test ensures that the use case correctly delegates
+// logic to the [IRepository].
+//
+// Key points covered in this test:
+// - [Mocktail] is used to mock the repository dependency.
+// - We verify that the repository method [login]
+//   is invoked exactly once.
+// - We check that the use case returns the expected [Right<void>] result.
+//
+// Note: `registerFallbackValue(value)` is typically required in [Mocktail]
+// when using [any()] for non-primitive arguments. Since no parameters
+// are passed in this test, no fallback values are needed.
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:{{package_name}}/core/errors/failure.dart';
+import 'package:{{package_name}}/core/utils/either.dart';
+import 'package:{{package_name}}/src/{{feature_name}}/domain/usecases/{{usecase_name}}_usecase.dart';
+import 'package:mocktail/mocktail.dart';
+
+/// IRepository must be changed by your own [Interface of Repository]
+class MockIRepository extends Mock implements IRepository {} // TODO: Use the real contract repository
+
+
+void main() {
+  late {{usecase_name.pascalCase}}Usecase usecase;
+  late IRepository mockIRepository; // Here we use the real type
+
+  setUp(() {
+    mockIRepository = MockIRepository(); // And here use the substitution mocked type
+    usecase = {{usecase_name.pascalCase}}Usecase(mockIRepository);
+
+    // Note: `registerFallbackValue(value)` is required when using [any()]
+    // for non-primitive parameters in [Mocktail]. Since we only pass
+    // simple strings here, it’s not needed yet.
+  });
+
+  //! To this example we going supose tha in the repository call the method [login]
+  test(
+     '{{usecase_name.pascalCase}}Usecase: [IRepository.login] should be called ',
+    () async {
+      // Arrange
+      // Mock repository response: return a valid [void] on login
+      when(
+        () => mockIRepository.login(),
+      ).thenAnswer((_) async => Right<Failure, void>(null));
+
+      // Act
+      final result = await usecase();
+
+      // Assert
+      // 1. The result should match the expected Right<void>
+      expect(result, Right<Failure, void>(null));
+
+      // 2. The repository should be called exactly once
+      verify(() => mockIRepository.login()).called(1);
+
+      // 3. No further interactions with the repository should occur
+      verifyNoMoreInteractions(mockIRepository);
+    },
+  );
+}

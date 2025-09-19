@@ -122,9 +122,6 @@ async function copyInitialTemplatesFromFolder(
         root_folder: rootFolder,
       });
 
-      // Special handling for imports in Dart files
-      templateContent = fixDartImports(templateContent, packageName);
-
       // Write the file
       await writeFileExtPromise(destinationPath, templateContent);
       filesCreated++;
@@ -136,13 +133,6 @@ async function copyInitialTemplatesFromFolder(
   }
 
   return filesCreated;
-}
-
-// Fix Dart imports to use the correct package name
-function fixDartImports(content: string, packageName: string): string {
-  // Replace hardcoded package references like 'package:gymtor/' with the actual package name
-  // This handles cases where templates might have specific package references
-  return content.replace(/package:gymtor\//g, `package:${packageName}/`);
 }
 
 function getAllTemplateFiles(dir: string): string[] {

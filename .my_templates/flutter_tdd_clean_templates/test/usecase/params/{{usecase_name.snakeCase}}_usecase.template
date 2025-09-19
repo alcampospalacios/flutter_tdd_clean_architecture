@@ -1,0 +1,54 @@
+// Unit test for [{{usecase_name.pascalCase}}Usecase].
+//
+// This test verifies that the use case correctly delegates
+// authentication logic to the [IRepository].
+//
+// The repository is mocked using [Mocktail], and [Right]/[Failure]
+// are used to handle success/failure results consistently.
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:{{package_name}}/core/errors/failure.dart';
+import 'package:{{package_name}}/core/utils/either.dart';
+import 'package:{{package_name}}/src/{{feature_name}}/domain/usecases/{{usecase_name}}_usecase.dart';
+import 'package:mocktail/mocktail.dart';
+
+/// IRepository must be changed by your own [Interface of Repository]
+class MockIRepository extends Mock implements IRepository {} // TODO: Use the real contract repository
+
+void main() {
+  late {{usecase_name.pascalCase}}Usecase usecase;
+  late IRepository mockIRepository; // Here we use the real type
+
+  setUp(() {
+    mockIRepository = MockIRepository(); // And here use the substitution mocked type
+    usecase = {{usecase_name.pascalCase}}Usecase(mockIRepository);
+
+    // Note: `registerFallbackValue(value)` is required when using [any()]
+    // for non-primitive parameters in [Mocktail]. Since we only pass
+    // simple strings here, it’s not needed yet.
+  });
+
+  
+  //! To this example we going supose tha in the repository call the method [login]
+
+  test(
+    '{{usecase_name.pascalCase}}Usecase: [IRepository.login] should call with the correct parameters',
+    () async {
+      // Arrange
+      final params = Params(email: 'test@gmail.com', password: 'password'); // ! TODO: You must use your real params
+      when(
+        () => mockIRepository.login(email: params.email, password: params.password),
+      ).thenAnswer((_) async => Right(Token(accessToken: 'accessToken', tokenType: 'tokenType'))); // ! Token must be your entity that his life is in domain, and presentation layers
+
+      // Act
+      final result = await usecase(params); //! Here we call the usecase and fired the IRepository.methodCall
+
+      // Assert
+      expect(result, Right<Failure, Token>(Token(accessToken: 'accessToken', tokenType: 'tokenType')));
+      verify(
+        () => mockIRepository.login(email: params.email, password: params.password),
+      ).called(1); //! To Verify the repo is called once
+      verifyNoMoreInteractions(mockIRepository); //! Verify not more interacion with the IRepository
+    },
+  );
+}
