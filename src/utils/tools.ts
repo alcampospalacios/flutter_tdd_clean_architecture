@@ -1,5 +1,6 @@
 import { camelCase, pascalCase, snakeCase } from 'change-case';
 import { Uri, window, workspace } from 'vscode';
+import * as vscode from 'vscode';
 import fs = require('fs');
 import path = require('path');
 const axios = require('axios').default;
@@ -84,4 +85,57 @@ export async function donwloadTemplateFiles(file: string, url: string) {
     responseType: 'stream',
   });
   await response.data.pipe(fs.createWriteStream(file));
+}
+
+/**
+ * 📝 HELPER FUNCTION: Get use case name (should be moved to shared utilities)
+ *
+ * This function should be accessible from the command registration,
+ * so you might want to move it to utils or make it available here.
+ */
+export async function getUsecaseName(): Promise<string | undefined> {
+  const usecaseName = await vscode.window.showInputBox({
+    title: 'Create Use Case',
+    prompt: 'Use case name? (prefer snake_case format!)',
+    placeHolder: 'Ex: get_user_profile, login_user, fetch_products',
+    validateInput: function (value: string) {
+      if (!value || value?.includes(' ')) {
+        return 'Name is required and spaces are not allowed!';
+      }
+      return null;
+    },
+  });
+
+  return usecaseName;
+}
+
+/**
+ * 📥 LEGACY FUNCTION: Download templates (kept for compatibility)
+ *
+ * This function is kept for compatibility with previous versions,
+ * but now templates are organized in the new folder structure.
+ */
+export async function getTemplatesFile(uri: Uri) {
+  const rootFolder = getRootFolder(uri);
+  const defaultTemplateFolder = `${rootFolder}/.my_templates`;
+
+  if (!fs.existsSync(defaultTemplateFolder)) {
+    fs.mkdirSync(defaultTemplateFolder, { recursive: true });
+  }
+
+  try {
+    const { recursiveDownload } = require('gh-retrieve');
+
+    await recursiveDownload({
+      author: await getRepoAuthor(),
+      repo: await getRepoName(),
+      targetdir: await getRepoFolder(),
+      outdir: defaultTemplateFolder,
+    });
+
+    window.showInformationMessage('✅ Templates downloaded successfully!');
+  } catch (err: any) {
+    console.log('Error downloading templates:', err.stack);
+    window.showErrorMessage(`❌ Error downloading templates: ${err.message}`);
+  }
 }

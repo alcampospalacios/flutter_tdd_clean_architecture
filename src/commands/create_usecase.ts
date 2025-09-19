@@ -1,227 +1,240 @@
-import { readFileSync, writeFile } from 'fs';
+import { readFileSync } from 'fs';
 import { Uri, window } from 'vscode';
 import * as utils from '../utils/tools';
 import fs = require('fs');
 import { dirname } from 'path';
+import { getUsecaseName } from '../utils/tools';
 
+/**
+ * 🎯 MAIN FUNCTION: Creates a new Use Case with its test
+ *
+ * This function creates only:
+ * 1. The main Use Case file in lib/src/{feature}/domain/usecases/
+ * 2. The corresponding test file in test/src/{feature}/domain/usecases/
+ *
+ * It NO LONGER creates repository or datasource (those will be done separately)
+ *
+ * @param uri - URI of the folder where the command was executed
+ */
 export async function createUsecase(uri: Uri) {
-  //Get the keywords values
-
+  // 📁 STEP 1: Get project information and context
   const clickedFolder = utils.getClickedFolder(uri);
   let rootFolder = utils.getRootFolder(uri);
   rootFolder = rootFolder.replaceAll('\\', '/');
-  const filePathConfigList = await utils.getExtensionFileTemplates();
-  const usecaseName = await getUsecaseName();
   let packageName = await utils.getPackageName(uri);
   packageName = packageName.replaceAll('\\', '/');
 
-  //Se não informar o usecaseName não deve continuar
+  // 📝 STEP 2: Get the use case name from user input
+  const usecaseName = await getUsecaseName();
   if (!usecaseName) {
+    return; // User cancelled or didn't enter a name
+  }
+
+  // 🔍 STEP 3: Extract feature name from the clicked folder path
+  const featureName = getFeatureNameFromPath(clickedFolder);
+  if (!featureName) {
+    window.showErrorMessage(
+      'Could not determine feature name from the selected folder. Please select a folder within a feature.',
+    );
     return;
   }
 
-  if (filePathConfigList && Array.isArray(filePathConfigList)) {
-    const templatesList = getTemplatesFileList(filePathConfigList);
-    let featureName: string;
+  try {
+    // 📂 STEP 4: Define specific templates for use cases
+    const templateBaseFolder = `${rootFolder}/.my_templates/flutter_tdd_clean_templates`;
 
-    try {
-      let templatesMap = new Map<string, string>();
+    const usecaseTemplates = [
+      {
+        templatePath: `${templateBaseFolder}/feature/usecase/params/${usecaseName}_usecase.template`,
+        destinationPath: `${rootFolder}/lib/src/${featureName}/domain/usecases/${usecaseName}_usecase.dart`,
+        type: 'usecase',
+      },
+      {
+        templatePath: `${templateBaseFolder}/test/usecase/params/${usecaseName}_usecase_test.template`,
+        destinationPath: `${rootFolder}/test/src/${featureName}/domain/usecases/${usecaseName}_usecase_test.dart`,
+        type: 'test',
+      },
+    ];
 
-      templatesList.forEach(async (element: string) => {
-        featureName = getFeatureName(clickedFolder, element, uri);
-        if (!featureName) {
-          return;
-        }
+    let filesCreated = 0;
 
-        const templateFileName = element.substring(element.lastIndexOf('/') + 1, element.length);
+    // 🔄 STEP 5: Process each template
+    for (const template of usecaseTemplates) {
+      if (fs.existsSync(template.templatePath)) {
+        await processUsecaseTemplate(template.templatePath, template.destinationPath, {
+          featureName,
+          usecaseName,
+          packageName,
+          clickedFolder,
+          rootFolder,
+        });
+        filesCreated++;
+        console.log(`✅ Created ${template.type}: ${template.destinationPath}`);
+      } else {
+        window.showWarningMessage(`⚠️ Template not found: ${template.templatePath}`);
+      }
+    }
 
-        const pathFileName = element
-          .replaceName('{{feature_name}}', featureName)
-          .replaceName('{{custom_folder}}', clickedFolder)
-          .replaceName('{{usecase_name}}', usecaseName)
-          .replaceName('{{package_name}}', packageName)
-          .replaceName('{{root_folder}}', rootFolder)
+    // 🎉 STEP 6: Show results
+    if (filesCreated > 0) {
+      window.showInformationMessage(
+        `🎉 Use Case '${usecaseName}' created successfully! ${filesCreated} files generated.`,
+      );
+    } else {
+      window.showErrorMessage('❌ No files were created. Please check that the templates exist.');
+    }
+  } catch (error) {
+    console.error('Error creating use case:', error);
+    window.showErrorMessage(`❌ Error creating use case: ${error}`);
+    throw error;
+  }
+}
 
-          .replaceName('{{feature_name.lowerCase}}', featureName)
-          .replaceName('{{custom_folder.lowerCase}}', clickedFolder)
-          .replaceName('{{usecase_name.lowerCase}}', usecaseName)
-          .replaceName('{{package_name.lowerCase}}', packageName)
-          .replaceName('{{root_folder.lowerCase}}', rootFolder)
+/**
+ * 🔄 FUNCTION: Process an individual use case template
+ *
+ * Reads the template, replaces all placeholders and writes the final file.
+ *
+ * @param templatePath - Path to the template file
+ * @param destinationPath - Path where to create the final file
+ * @param placeholders - Object with all values to replace
+ */
+async function processUsecaseTemplate(
+  templatePath: string,
+  destinationPath: string,
+  placeholders: {
+    featureName: string;
+    usecaseName: string;
+    packageName: string;
+    clickedFolder: string;
+    rootFolder: string;
+  },
+) {
+  try {
+    // 📖 Read template content
+    let templateContent = readFileSync(templatePath, 'utf8');
 
-          .replaceName('{{feature_name.upperCase}}', featureName)
-          .replaceName('{{custom_folder.upperCase}}', clickedFolder)
-          .replaceName('{{usecase_name.upperCase}}', usecaseName)
-          .replaceName('{{package_name.upperCase}}', packageName)
-          .replaceName('{{root_folder.upperCase}}', rootFolder)
+    // 🔄 Replace placeholders in content
+    templateContent = replacePlaceholdersInContent(templateContent, placeholders);
 
-          .replaceName('{{feature_name.snakeCase}}', featureName)
-          .replaceName('{{custom_folder.snakeCase}}', clickedFolder)
-          .replaceName('{{usecase_name.snakeCase}}', usecaseName)
-          .replaceName('{{package_name.snakeCase}}', packageName)
-          .replaceName('{{root_folder.snakeCase}}', rootFolder)
+    // 🎨 Fix Dart-specific imports
+    templateContent = fixDartImports(templateContent, placeholders.packageName);
 
-          .replaceName('{{feature_name.pascalCase}}', featureName)
-          .replaceName('{{custom_folder.pascalCase}}', clickedFolder)
-          .replaceName('{{usecase_name.pascalCase}}', usecaseName)
-          .replaceName('{{package_name.pascalCase}}', packageName)
-          .replaceName('{{root_folder.pascalCase}}', rootFolder)
+    // 💾 Write the final file
+    await writeFileExtPromise(destinationPath, templateContent);
+  } catch (error) {
+    console.error(`Error processing template ${templatePath}:`, error);
+    throw error;
+  }
+}
 
-          .replaceName('{{feature_name.camelCase}}', featureName)
-          .replaceName('{{custom_folder.camelCase}}', clickedFolder)
-          .replaceName('{{usecase_name.camelCase}}', usecaseName)
-          .replaceName('{{package_name.camelCase}}', packageName)
-          .replaceName('{{root_folder.camelCase}}', rootFolder)
+/**
+ * 🔄 FUNCTION: Replace placeholders in content
+ *
+ * Replaces all placeholders with their format variants:
+ * - {{placeholder}} → original value
+ * - {{placeholder.lowerCase}} → in lowercase
+ * - {{placeholder.upperCase}} → in UPPERCASE
+ * - {{placeholder.snakeCase}} → in snake_case
+ * - {{placeholder.pascalCase}} → in PascalCase
+ * - {{placeholder.camelCase}} → in camelCase
+ */
+function replacePlaceholdersInContent(content: string, placeholders: any): string {
+  let result = content;
 
-          .replaceAll('.template', '.dart');
+  // List of all available placeholders
+  const allPlaceholders: any = {
+    feature_name: placeholders.featureName,
+    usecase_name: placeholders.usecaseName,
+    package_name: placeholders.packageName,
+    custom_folder: placeholders.clickedFolder,
+    root_folder: placeholders.rootFolder,
+  };
 
-        let templateFile = `${rootFolder}/.my_templates/flutter_tdd_clean_templates/${templateFileName}`;
-        let templateContent = readFileSync(templateFile, 'utf8');
+  // Replace each placeholder with all its variants
+  Object.keys(allPlaceholders).forEach((key) => {
+    const value = allPlaceholders[key];
+    result = result.replaceName(`{{${key}}}`, value);
+    result = result.replaceName(`{{${key}.lowerCase}}`, value);
+    result = result.replaceName(`{{${key}.upperCase}}`, value);
+    result = result.replaceName(`{{${key}.snakeCase}}`, value);
+    result = result.replaceName(`{{${key}.pascalCase}}`, value);
+    result = result.replaceName(`{{${key}.camelCase}}`, value);
+  });
 
-        if (templateContent && templateContent !== null) {
-          templatesMap.set(pathFileName, templateContent);
+  return result;
+}
+
+/**
+ * 🎨 FUNCTION: Fix Dart imports
+ *
+ * Replaces hardcoded package references in imports
+ * to use the correct name of the current package.
+ */
+function fixDartImports(content: string, packageName: string): string {
+  return content.replace(/package:gymtor\//g, `package:${packageName}/`);
+}
+
+/**
+ * 🔍 FUNCTION: Extract feature name from clicked path
+ *
+ * Looks for common patterns in Clean Architecture structure
+ * to automatically determine the feature name.
+ *
+ * Supported patterns:
+ * - /src/FEATURE_NAME/domain/...
+ * - /lib/src/FEATURE_NAME/...
+ * - /test/src/FEATURE_NAME/...
+ */
+function getFeatureNameFromPath(clickedFolder: string): string {
+  const pathParts = clickedFolder.split('/');
+
+  // Look for 'src' index in the path
+  const srcIndex = pathParts.indexOf('src');
+
+  if (srcIndex !== -1 && srcIndex + 1 < pathParts.length) {
+    // Feature name is right after 'src'
+    return pathParts[srcIndex + 1];
+  }
+
+  // If we don't find 'src', try other patterns
+  const domainIndex = pathParts.indexOf('domain');
+  if (domainIndex !== -1 && domainIndex - 1 >= 0) {
+    // Feature name is right before 'domain'
+    return pathParts[domainIndex - 1];
+  }
+
+  // As last resort, use the second-to-last element of the path
+  if (pathParts.length >= 2) {
+    return pathParts[pathParts.length - 2];
+  }
+
+  return '';
+}
+
+/**
+ * 💾 FUNCTION: File writing with Promises
+ *
+ * Creates necessary directories and writes the file asynchronously.
+ */
+function writeFileExtPromise(path: string, contents: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    fs.mkdir(dirname(path), { recursive: true }, function (err: any) {
+      if (err) {
+        console.error('Error creating directory:', err);
+        reject(err);
+        return;
+      }
+
+      fs.writeFile(path, contents, 'utf8', (error) => {
+        if (error) {
+          console.error('Error writing file:', path, error);
+          reject(error);
+        } else {
+          console.log('✅ Created file:', path);
+          resolve();
         }
       });
-
-      if (templatesMap) {
-        templatesMap.forEach((content, filePath) => {
-          content = content.replaceName('{{feature_name}}', featureName!);
-          content = content.replaceName('{{custom_folder}}', clickedFolder);
-          content = content.replaceName('{{usecase_name}}', usecaseName);
-          content = content.replaceName('{{package_name}}', packageName);
-          content = content.replaceName('{{root_folder}}', rootFolder);
-
-          content = content.replaceName('{{feature_name.lowerCase}}', featureName!);
-          content = content.replaceName('{{custom_folder.lowerCase}}', clickedFolder);
-          content = content.replaceName('{{usecase_name.lowerCase}}', usecaseName);
-          content = content.replaceName('{{package_name.lowerCase}}', packageName);
-          content = content.replaceName('{{root_folder.lowerCase}}', rootFolder);
-
-          content = content.replaceName('{{feature_name.upperCase}}', featureName!);
-          content = content.replaceName('{{custom_folder.upperCase}}', clickedFolder);
-          content = content.replaceName('{{usecase_name.upperCase}}', usecaseName);
-          content = content.replaceName('{{package_name.upperCase}}', packageName);
-          content = content.replaceName('{{root_folder.upperCase}}', rootFolder);
-
-          content = content.replaceName('{{feature_name.snakeCase}}', featureName!);
-          content = content.replaceName('{{custom_folder.snakeCase}}', clickedFolder);
-          content = content.replaceName('{{usecase_name.snakeCase}}', usecaseName);
-          content = content.replaceName('{{package_name.snakeCase}}', packageName);
-          content = content.replaceName('{{root_folder.snakeCase}}', rootFolder);
-
-          content = content.replaceName('{{feature_name.pascalCase}}', featureName!);
-          content = content.replaceName('{{custom_folder.pascalCase}}', clickedFolder);
-          content = content.replaceName('{{usecase_name.pascalCase}}', usecaseName);
-          content = content.replaceName('{{package_name.pascalCase}}', packageName);
-          content = content.replaceName('{{root_folder.pascalCase}}', rootFolder);
-
-          content = content.replaceName('{{feature_name.camelCase}}', featureName!);
-          content = content.replaceName('{{custom_folder.camelCase}}', clickedFolder);
-          content = content.replaceName('{{usecase_name.camelCase}}', usecaseName);
-          content = content.replaceName('{{package_name.camelCase}}', packageName);
-          content = content.replaceName('{{root_folder.camelCase}}', rootFolder);
-
-          templatesMap.set(filePath, content);
-
-          writeFileExt(filePath, content);
-        });
-      }
-    } catch (error) {
-      console.log('Error', error);
-      throw error;
-    }
-  }
-}
-
-function writeFileExt(path: string, contents: string) {
-  fs.mkdir(dirname(path), { recursive: true }, function (err: any) {
-    if (err) return err;
-
-    fs.writeFile(path, contents, 'utf8', (error) => {
-      console.log('ErrorWriteFile ', error);
     });
-  });
-}
-
-async function getUsecaseName(): Promise<string | undefined> {
-  const usecaseName = await window.showInputBox({
-    title: 'Create Usecase',
-    prompt: 'Usecase name? (please, prefer snake_case mode!)',
-    placeHolder: 'Ex: get_products -> get_products_usecase',
-    validateInput: function (value: string) {
-      if (!value || value?.includes(' ')) {
-        return 'Name is required! and spaces are not allowed!';
-      }
-    },
-  });
-
-  return usecaseName;
-}
-
-function getTemplatesFileList(filePathConfig: Array<string>) {
-  const templatesList = filePathConfig.filter((element) => {
-    return element.endsWith('.template');
-  });
-  return templatesList;
-}
-
-function getFeatureName(clickedFolder: string, template: string, uri: Uri): string {
-  let indexOfFeatureName = 0;
-  template = template.replaceName('{{root_folder}}', utils.getRootFolder(uri));
-  const templateArray = template.split('/');
-  const clickedArray = clickedFolder.split('/');
-  // TODO: check if the feature value is necessary
-  const featureName = templateArray.find(isFeature);
-  if (featureName) {
-    indexOfFeatureName = templateArray.indexOf(featureName, 3);
-  }
-  if (indexOfFeatureName > 0) {
-    indexOfFeatureName = clickedArray.indexOf('domain');
-    return clickedArray[indexOfFeatureName - 1];
-  } else {
-    return '';
-  }
-}
-
-function isFeature(item: string) {
-  return item.includes('feature_name');
-}
-
-export async function getTemplatesFile(uri: Uri) {
-  const rootFolder = utils.getRootFolder(uri);
-  const defaultTemplateFolder = `${rootFolder}/.flutter_tdd_clean_templates`;
-
-  if (!fs.existsSync(defaultTemplateFolder)) {
-    fs.mkdirSync(defaultTemplateFolder);
-  }
-
-  const { recursiveDownload } = require('gh-retrieve');
-
-  recursiveDownload({
-    author: await utils.getRepoAuthor(), //repository owner
-    repo: await utils.getRepoName(), //repository name
-    targetdir: await utils.getRepoFolder(), //target directory to download
-    outdir: defaultTemplateFolder, //directory to download in
-  }).catch((err: { stack: any }) => {
-    console.log(err.stack);
-  });
-
-  const baseUrl =
-    'https://raw.githubusercontent.com/alcampospalacios/clean-architecture-scaffolding/main/.my_templates/flutter_tdd_clean_templates/';
-
-  const templates = [
-    `${baseUrl}%7B%7Busecase_name.snakeCase%7D%7D_datasource.template`,
-    `${baseUrl}%7B%7Busecase_name.snakeCase%7D%7D_datasource_impl.template`,
-    `${baseUrl}%7B%7Busecase_name.snakeCase%7D%7D_repository.template`,
-    `${baseUrl}%7B%7Busecase_name.snakeCase%7D%7D_repository_impl.template`,
-    `${baseUrl}%7B%7Busecase_name.snakeCase%7D%7D_usecase.template`,
-  ];
-
-  templates.forEach((url) => {
-    const file = url
-      .replaceAll('%7B', '{')
-      .replaceAll('%7D', '}')
-      .substring(url.lastIndexOf('/'), url.length);
-
-    utils.donwloadTemplateFiles(`${defaultTemplateFolder}${file}`, url);
   });
 }
