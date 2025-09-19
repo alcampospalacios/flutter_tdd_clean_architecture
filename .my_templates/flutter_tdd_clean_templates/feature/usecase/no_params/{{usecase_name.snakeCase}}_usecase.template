@@ -30,12 +30,11 @@ class {{usecase_name.pascalCase}}Usecase extends UsecaseBaseWithoutParams<void> 
   /// Requires an [IRepository] to perform the actual call.
   const {{usecase_name.pascalCase}}Usecase(this._repository);
 
-  final IRepository _repository;
+  final IRepository _repository; //! TODO: Replace [IRepository] by the real contract repository
 
   @override
-  ResultFuture<void> call(Params params) async {
-  //  Example
-  //  return await _repository.login();
+  ResultFuture<void> call() async {
+    return await _repository.login(); //! TODO: Replace by the real [call] from repository
   }
 }
 

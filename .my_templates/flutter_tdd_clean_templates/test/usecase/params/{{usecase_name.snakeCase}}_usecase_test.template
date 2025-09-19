@@ -13,11 +13,11 @@ import 'package:{{package_name}}/src/{{feature_name}}/domain/usecases/{{usecase_
 import 'package:mocktail/mocktail.dart';
 
 /// IRepository must be changed by your own [Interface of Repository]
-class MockIRepository extends Mock implements IRepository {} // TODO: Use the real contract repository
+class MockIRepository extends Mock implements IRepository {} //! TODO: Replace [IRepository] by the real contract repository
 
 void main() {
   late {{usecase_name.pascalCase}}Usecase usecase;
-  late IRepository mockIRepository; // Here we use the real type
+  late IRepository mockIRepository; //! TODO: Replace [IRepository] by the real contract repository
 
   setUp(() {
     mockIRepository = MockIRepository(); // And here use the substitution mocked type
@@ -35,18 +35,18 @@ void main() {
     '{{usecase_name.pascalCase}}Usecase: [IRepository.login] should call with the correct parameters',
     () async {
       // Arrange
-      final params = Params(email: 'test@gmail.com', password: 'password'); // ! TODO: You must use your real params
+      final params = Params(email: 'test@gmail.com', password: 'password'); // ! TODO: Replace [Params(fields)] by your real params
       when(
         () => mockIRepository.login(email: params.email, password: params.password),
-      ).thenAnswer((_) async => Right(Token(accessToken: 'accessToken', tokenType: 'tokenType'))); // ! Token must be your entity that his life is in domain, and presentation layers
+      ).thenAnswer((_) async => Right(Token(accessToken: 'accessToken', tokenType: 'tokenType'))); // ! TODO: Replace [Token] by your entity
 
       // Act
-      final result = await usecase(params); //! Here we call the usecase and fired the IRepository.methodCall
+      final result = await usecase(params); // Here we call the usecase and fired the IRepository.methodCall
 
       // Assert
-      expect(result, Right<Failure, Token>(Token(accessToken: 'accessToken', tokenType: 'tokenType')));
+      expect(result, Right<Failure, Token>(Token(accessToken: 'accessToken', tokenType: 'tokenType'))); // ! TODO: Replace [Token] by your entity
       verify(
-        () => mockIRepository.login(email: params.email, password: params.password),
+        () => mockIRepository.login(email: params.email, password: params.password), // ! TODO: Replace [mockIRepository.login] by your real call
       ).called(1); //! To Verify the repo is called once
       verifyNoMoreInteractions(mockIRepository); //! Verify not more interacion with the IRepository
     },

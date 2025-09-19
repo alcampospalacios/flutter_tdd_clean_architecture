@@ -20,12 +20,12 @@ import 'package:{{package_name}}/src/{{feature_name}}/domain/usecases/{{usecase_
 import 'package:mocktail/mocktail.dart';
 
 /// IRepository must be changed by your own [Interface of Repository]
-class MockIRepository extends Mock implements IRepository {} // TODO: Use the real contract repository
+class MockIRepository extends Mock implements IRepository {} //! TODO: Replace [IRepository] by the real contract repository
 
 
 void main() {
   late {{usecase_name.pascalCase}}Usecase usecase;
-  late IRepository mockIRepository; // Here we use the real type
+  late IRepository mockIRepository; //! TODO: Replace [IRepository] by the real contract repository
 
   setUp(() {
     mockIRepository = MockIRepository(); // And here use the substitution mocked type

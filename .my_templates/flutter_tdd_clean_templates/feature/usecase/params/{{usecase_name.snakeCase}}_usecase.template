@@ -33,12 +33,12 @@ class {{usecase_name.pascalCase}}Usecase extends UsecaseBaseWithParams<void, Par
   /// Requires an [IRepository] to perform the actual call.
   const {{usecase_name.pascalCase}}Usecase(this._repository);
 
-  final IRepository _repository;
+  final IRepository _repository; //! TODO: Replace [IRepository] by the real contract repository
 
   @override
-  ResultFuture<Token> call(Params params) async {
+  ResultFuture<Token> call(Params params) async { //! TODO: Replace [Token] by the real entity
   //  Example
-  //  return await _repository.login(email: params.email, password: params.password);
+    return await _repository.login(email: params.email, password: params.password); //! TODO: Replace [_repository.login] by the real method on repository
   }
 }
 
@@ -59,12 +59,11 @@ class Params extends Equatable {
   const Params({required this.email, required this.password});
 
   /// The user’s email address.
-  // final String email;
+  final String email; //! TODO: Replace [email] field by your real field
 
   /// The user’s password.
-  // final String password;
+  final String password; //! TODO: Replace [password] field by your real field
 
   @override
-  // List<Object?> get props => [email, password];
-  List<Object?> get props => [];
+   List<Object?> get props => [email, password]; //! TODO: Replace [fields] by your real fields
 }
