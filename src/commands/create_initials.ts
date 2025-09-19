@@ -3,6 +3,7 @@ import { Uri, window } from 'vscode';
 import * as utils from '../utils/tools';
 import fs = require('fs');
 import { dirname } from 'path';
+import { getAllTemplateFiles, getTemplatesFile } from '../utils/tools';
 
 export async function createInitials(uri: Uri) {
   const clickedFolder = utils.getClickedFolder(uri);
@@ -20,7 +21,7 @@ export async function createInitials(uri: Uri) {
       'No',
     );
     if (YES_NO === 'Yes') {
-      await downloadInitialTemplates(uri);
+      await getTemplatesFile(uri);
       window.showInformationMessage(
         'Templates downloaded successfully! Please run the command again.',
       );
@@ -135,29 +136,6 @@ async function copyInitialTemplatesFromFolder(
   return filesCreated;
 }
 
-function getAllTemplateFiles(dir: string): string[] {
-  const files: string[] = [];
-
-  if (!fs.existsSync(dir)) {
-    return files;
-  }
-
-  const items = fs.readdirSync(dir);
-
-  for (const item of items) {
-    const fullPath = `${dir}/${item}`;
-    const stat = fs.statSync(fullPath);
-
-    if (stat.isDirectory()) {
-      files.push(...getAllTemplateFiles(fullPath));
-    } else if (item.endsWith('.template')) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
-}
-
 function replacePlaceholdersInPath(path: string, placeholders: any): string {
   let result = path;
 
@@ -230,117 +208,4 @@ function writeFileExtPromise(path: string, contents: string): Promise<void> {
       });
     });
   });
-}
-
-async function downloadInitialTemplates(uri: Uri) {
-  console.log('=== STARTING DOWNLOAD DEBUG ===');
-
-  const rootFolder = utils.getRootFolder(uri);
-  const defaultTemplateFolder = `${rootFolder}/.my_templates/flutter_tdd_clean_templates`;
-  const author = await utils.getRepoAuthor();
-  const repo = await utils.getRepoName();
-  const targetdir = await utils.getRepoFolder();
-
-  console.log('=== CONFIGURATION VALUES ===');
-  console.log('Root folder:', rootFolder);
-  console.log('Template folder:', defaultTemplateFolder);
-  console.log('Author:', author);
-  console.log('Repo:', repo);
-  console.log('Target dir:', targetdir);
-  console.log('Expected URL:', `https://github.com/${author}/${repo}/tree/main/${targetdir}`);
-
-  // Crear carpeta si no existe
-  if (!fs.existsSync(defaultTemplateFolder)) {
-    console.log('Creating directory:', defaultTemplateFolder);
-    fs.mkdirSync(defaultTemplateFolder, { recursive: true });
-    console.log('Directory created successfully');
-  } else {
-    console.log('Directory already exists');
-  }
-
-  // Verificar que gh-retrieve esté disponible
-  try {
-    const ghRetrieve = require('gh-retrieve');
-    console.log('gh-retrieve loaded successfully');
-    console.log('Available methods:', Object.keys(ghRetrieve));
-  } catch (requireError) {
-    console.error('Error loading gh-retrieve:', requireError);
-    window.showErrorMessage('gh-retrieve module not found. Run: npm install gh-retrieve');
-    return;
-  }
-
-  try {
-    const { recursiveDownload } = require('gh-retrieve');
-
-    console.log('=== STARTING RECURSIVE DOWNLOAD ===');
-
-    const downloadConfig = {
-      author: author, // "alcampospalacios"
-      repo: repo, // "flutter_tdd_clean_architecture"
-      targetdir: targetdir, // ".my_templates/flutter_tdd_clean_templates/"
-      outdir: defaultTemplateFolder, // local destination
-    };
-
-    console.log('Download config:', JSON.stringify(downloadConfig, null, 2));
-    console.log(
-      'This should download from:',
-      `https://github.com/${author}/${repo}/tree/main/${targetdir}`,
-    );
-    console.log('To local folder:', defaultTemplateFolder);
-
-    // Ejecutar la descarga
-    console.log('Calling recursiveDownload...');
-    await recursiveDownload(downloadConfig);
-    console.log('recursiveDownload completed without throwing error');
-
-    // Verificar qué se descargó
-    console.log('=== VERIFYING DOWNLOAD RESULTS ===');
-    if (fs.existsSync(defaultTemplateFolder)) {
-      try {
-        const items = fs.readdirSync(defaultTemplateFolder, { withFileTypes: true });
-        console.log('Items in template folder:', items.length);
-
-        items.forEach((item) => {
-          const type = item.isDirectory() ? 'DIR' : 'FILE';
-          console.log(`  ${type}: ${item.name}`);
-        });
-
-        // Contar archivos .template recursivamente
-        const templateFiles = getAllTemplateFiles(defaultTemplateFolder);
-        console.log('Template files found:', templateFiles.length);
-        templateFiles.forEach((file) => {
-          console.log(`  TEMPLATE: ${file}`);
-        });
-      } catch (readError) {
-        console.error('Error reading downloaded folder:', readError);
-      }
-    } else {
-      console.error('Template folder does not exist after download!');
-    }
-
-    console.log('=== DOWNLOAD SUCCESS ===');
-    window.showInformationMessage('Templates downloaded successfully!');
-  } catch (err: any) {
-    console.log('=== DOWNLOAD ERROR ===');
-    console.log('Error type:', typeof err);
-    console.log('Error name:', err.name);
-    console.log('Error message:', err.message);
-    console.log('Error code:', err.code);
-    console.log('Error stack:', err.stack);
-
-    // Información adicional si está disponible
-    if (err.response) {
-      console.log('HTTP Response status:', err.response.status);
-      console.log('HTTP Response data:', err.response.data);
-    }
-
-    if (err.config) {
-      console.log('Request config:', err.config);
-    }
-
-    console.log('Full error object:', JSON.stringify(err, Object.getOwnPropertyNames(err), 2));
-
-    window.showErrorMessage(`Error downloading templates: ${err.message}`);
-    throw err;
-  }
 }
