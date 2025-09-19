@@ -45,12 +45,12 @@ export async function createUsecase(uri: Uri) {
 
     const usecaseTemplates = [
       {
-        templatePath: `${templateBaseFolder}/feature/usecase/params/${usecaseName}_usecase.template`,
+        templatePath: `${templateBaseFolder}/feature/usecase/params/{{usecase_name.snakeCase}}_usecase.template`,
         destinationPath: `${rootFolder}/lib/src/${featureName}/domain/usecases/${usecaseName}_usecase.dart`,
         type: 'usecase',
       },
       {
-        templatePath: `${templateBaseFolder}/test/usecase/params/${usecaseName}_usecase_test.template`,
+        templatePath: `${templateBaseFolder}/test/usecase/params/{{usecase_name.snakeCase}}_usecase_test.template`,
         destinationPath: `${rootFolder}/test/src/${featureName}/domain/usecases/${usecaseName}_usecase_test.dart`,
         type: 'test',
       },
