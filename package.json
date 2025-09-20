@@ -108,27 +108,42 @@
         {
           "when": "explorerResourceIsFolder",
           "command": "tdd-clean-architecture.createInitials",
-          "group": "1_clean_architecture_scaffolding@1"
+          "group": "3_clean_architecture_scaffolding@1"
         },
         {
           "when": "explorerResourceIsFolder",
           "command": "tdd-clean-architecture.createFolders",
-          "group": "1_clean_architecture_scaffolding@2"
+          "group": "3_clean_architecture_scaffolding@2"
         },
         {
           "when": "explorerResourceIsFolder",
           "command": "tdd-clean-architecture.createUsecase",
-          "group": "1_clean_architecture_scaffolding@3"
+          "group": "4_clean_architecture_scaffolding@1"
         },
         {
           "when": "explorerResourceIsFolder",
           "command": "tdd-clean-architecture.createUsecaseNoParams",
-          "group": "1_clean_architecture_scaffolding@4"
+          "group": "4_clean_architecture_scaffolding@2"
         },
         {
           "when": "explorerResourceIsFolder",
           "command": "tdd-clean-architecture.createRepository",
-          "group": "1_clean_architecture_scaffolding@5"
+          "group": "4_clean_architecture_scaffolding@3"
+        },
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "tdd-clean-architecture.addDependencies",
+          "group": "2_clean_architecture_dependencies@1"
+        },
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "tdd-clean-architecture.previewDependencies",
+          "group": "2_clean_architecture_dependencies@2"
+        },
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "tdd-clean-architecture.checkDependencies",
+          "group": "2_clean_architecture_dependencies@3"
         }
       ]
     },
@@ -156,6 +171,21 @@
       {
         "command": "tdd-clean-architecture.createRepository",
         "title": "TDD Clean Arch.: New Repository",
+        "category": "TDD Clean Arch"
+      },
+      {
+        "command": "tdd-clean-architecture.addDependencies",
+        "title": "TDD Clean Arch.: Add dependencies",
+        "category": "TDD Clean Arch"
+      },
+      {
+        "command": "tdd-clean-architecture.previewDependencies",
+        "title": "TDD Clean Arch.: Preview dependencies",
+        "category": "TDD Clean Arch"
+      },
+      {
+        "command": "tdd-clean-architecture.checkDependencies",
+        "title": "TDD Clean Arch.: Check dependencies",
         "category": "TDD Clean Arch"
       }
     ]

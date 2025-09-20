@@ -7,6 +7,11 @@ import { createInitials } from './commands/create_initials';
 import { createRepository } from './commands/create_repository';
 import { getTemplatesFile, getUsecaseName } from './utils/tools';
 import { createUsecaseWithoutParams } from './commands/create_usecase_without_params';
+import {
+  addCleanArchDependencies,
+  checkCleanArchDependencies,
+  previewCleanArchDependencies,
+} from './commands/create_dependencies_pubspec_last_avaible';
 
 export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand(
@@ -85,6 +90,30 @@ export function activate(context: vscode.ExtensionContext) {
     async (uri: vscode.Uri) => {
       // Use the new createInitials function that handles all template files
       await createRepository(uri);
+    },
+  );
+
+  // 📦 NEW: Command to add all Clean Architecture dependencies
+  vscode.commands.registerCommand(
+    'tdd-clean-architecture.addDependencies',
+    async (uri: vscode.Uri) => {
+      await addCleanArchDependencies(uri);
+    },
+  );
+
+  // 📋 NEW: Command to preview dependencies before adding
+  vscode.commands.registerCommand(
+    'tdd-clean-architecture.previewDependencies',
+    async (uri: vscode.Uri) => {
+      await previewCleanArchDependencies(uri);
+    },
+  );
+
+  // 🔍 NEW: Command to check current dependency status
+  vscode.commands.registerCommand(
+    'tdd-clean-architecture.checkDependencies',
+    async (uri: vscode.Uri) => {
+      await checkCleanArchDependencies(uri);
     },
   );
 
