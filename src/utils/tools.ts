@@ -120,7 +120,7 @@ export async function getRepositoryName(): Promise<string | undefined> {
     title: 'Create Repository ',
     prompt: 'Repository name? (prefer snake_case format!)',
     placeHolder:
-      'Ex: authentication_repository, product_repository ... Normally you can use the name of the feature like feature: [exercise] then repository: [exercise_repository]',
+      'Ex: authentication, product, ... Normally you can use the name of the feature like feature: [exercise] then repository: [exercise]',
     validateInput: function (value: string) {
       if (!value || value?.includes(' ')) {
         return 'Name is required and spaces are not allowed!';
