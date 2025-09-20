@@ -12,18 +12,18 @@ class Mock{{repository_name.pascalCase}}RemoteDataSource extends Mock
 
 void main() {
   // Dependencies
-  late I{{repository_name.pascalCase}}RemoteDataSource {{repository_name.pascalCase}}RemoteDataSource;
+  late I{{repository_name.pascalCase}}RemoteDataSource remoteDataSource;
 
   // System under test (SUT)
-  late {{repository_name.pascalCase}}RepositoryImpl {{repository_name.pascalCase}}RepositoryImpl;
+  late {{repository_name.pascalCase}}RepositoryImpl repositoryImpl;
 
   // Dummy model returned by the remote data source
   late Model tModel;
 
   setUp(() {
-    {{repository_name.pascalCase}}RemoteDataSource = Mock{{repository_name.pascalCase}}RemoteDataSource();
-    {{repository_name.pascalCase}}RepositoryImpl = {{repository_name.pascalCase}}RepositoryImpl(
-      {{repository_name.pascalCase}}RemoteDataSource,
+    remoteDataSource = Mock{{repository_name.pascalCase}}RemoteDataSource();
+    repositoryImpl = {{repository_name.pascalCase}}RepositoryImpl(
+      remoteDataSource,
     );
     tModel = Model();
   });
@@ -35,7 +35,7 @@ void main() {
         // Arrange
         // Stub the remote data source to return a valid model when called.
         when(
-          () => {{repository_name.pascalCase}}RemoteDataSource.login(
+          () => remoteDataSource.login(
             email: any(named: 'email'),
             password: any(named: 'password'),
           ),
@@ -43,7 +43,7 @@ void main() {
 
         // Act
         // Call the repository method which internally delegates to the remote data source.
-        final result = await {{repository_name.pascalCase}}RepositoryImpl.login(
+        final result = await repositoryImpl.login(
           email: 'email',
           password: 'password',
         );
@@ -53,12 +53,12 @@ void main() {
         // and that the remote data source was called exactly once.
         expect(result, equals(Right<Failure, Entity>(tModel)));
         verify(
-          () => {{repository_name.pascalCase}}RemoteDataSource.login(
+          () => remoteDataSource.login(
             email: any(named: 'email'),
             password: any(named: 'password'),
           ),
         ).called(1);
-        verifyNoMoreInteractions({{repository_name.pascalCase}}RemoteDataSource);
+        verifyNoMoreInteractions(remoteDataSource);
       },
     );
 
@@ -68,7 +68,7 @@ void main() {
         // Arrange
         // Stub the remote data source to throw a ServerException instead of returning a model.
         when(
-          () => {{repository_name.pascalCase}}RemoteDataSource.login(
+          () => remoteDataSource.login(
             email: any(named: 'email'),
             password: any(named: 'password'),
           ),
@@ -77,7 +77,7 @@ void main() {
         // Act
         // Call the repository method which should catch the exception
         // and convert it into a Failure.
-        final result = await {{repository_name.pascalCase}}RepositoryImpl.login(
+        final result = await repositoryImpl.login(
           email: 'email',
           password: 'password',
         );
@@ -94,12 +94,12 @@ void main() {
           ),
         );
         verify(
-          () => {{repository_name.pascalCase}}RemoteDataSource.login(
+          () => remoteDataSource.login(
             email: any(named: 'email'),
             password: any(named: 'password'),
           ),
         ).called(1);
-        verifyNoMoreInteractions({{repository_name.pascalCase}}RemoteDataSource);
+        verifyNoMoreInteractions(remoteDataSource);
       },
     );
   });
