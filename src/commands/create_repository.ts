@@ -46,7 +46,7 @@ export async function createRepository(uri: Uri) {
     const repositoryTemplates = [
       {
         templatePath: `${templateBaseFolder}/feature/repository/{{repository_name.snakeCase}}_repository.template`,
-        destinationPath: `${rootFolder}/lib/src/${featureName}/domain/repositories/${repositoryName}_repository.dart`,
+        destinationPath: `${rootFolder}/lib/src/${featureName}/domain/repositories/i_${repositoryName}_repository.dart`,
         type: 'repository',
       },
       {
