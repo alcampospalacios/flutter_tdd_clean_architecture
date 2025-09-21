@@ -234,25 +234,27 @@ Automatically adds all required dependencies to `pubspec.yaml`.
 # Right-click on lib/src/ → "TDD Clean Arch.: Create folders"
 # Enter feature name (e.g., "authentication")
 ```
+This create the entire folder structure to a new feature
 
 ### 4️⃣ **Generate Use Cases**
 ```bash
 # Right-click on feature/domain/usecases/ → "TDD Clean Arch.: New usecase with params"
 # Enter use case name (e.g., "login_user")
-# Cretae a new usecase with base params
 ```
+This creates a usecase with support to Params
 
-### 5️⃣ **Generate Use Cases**
 ```bash
 # Right-click on feature/domain/usecases/ → "TDD Clean Arch.: New usecase without params","
 # Enter use case name (e.g., "login_user")
-# Cretae a new usecase with out base params
 ```
-### 6️⃣ **Generate Repository**
+This creates a usecase with no needs to Params
+
+### 5️⃣ **Generate Repository**
 ```bash
 # Right-click on feature/domain/repository/ → "TDD Clean Arch.: New Repository"
 # Enter repository name (e.g., "authentication")
 ```
+This create a repository, with his respective datasource
 
 ## 📚 Examples
 
