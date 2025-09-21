@@ -1,16 +1,16 @@
 {
-  "name": "clean-architecture-scaffolding",
-  "displayName": "Clean Architecture Scaffolding",
-  "description": "Generate folder structure and files for features in Flutter projects in accord with your custom templates",
+  "name": "tdd-clean-architecture",
+  "displayName": "TDD and Clean Architecture",
+  "description": "A comprehensive collection of templates to scaffold Flutter applications following Clean Architecture principles with Test-Driven Development (TDD) practices.",
   "publisher": "alcampospalacios",
-  "icon": "icon.png",
-  "homepage": "https://www.alcampospalacios.com",
+  "icon": "logo.png",
+  "homepage": "https://github.com/alcampospalacios/flutter_tdd_clean_architecture?tab=readme-ov-file#-overview",
   "author": {
     "name": "Alejandro Campos Palacios",
     "email": "alcampospalacios92@gmail.com",
     "url": "https://www.alcampospalacios.com"
   },
-  "version": "0.1.1",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/alcampospalacios/flutter_tdd_clean_architecture"
@@ -25,8 +25,12 @@
   "keywords": [
     "dart",
     "flutter",
+    "test driven development",
+    "tdd",
     "clean architecture",
-    "clean arch"
+    "clean arch",
+    "scaffolding",
+    "templates"
   ],
   "activationEvents": [
     "onCommand:tdd-clean-architecture.createInitials",
@@ -39,7 +43,7 @@
   "contributes": {
     "configuration": [
       {
-        "title": "Clean Architecture Scaffolding",
+        "title": "TDD and Clean Architecture",
         "properties": {
           "scaffolding.layers.templates": {
             "type": "array",
@@ -70,7 +74,7 @@
         }
       },
       {
-        "title": "Clean Architecture Scaffolding",
+        "title": "TDD and Clean Architecture",
         "properties": {
           "scaffolding.repository.author": {
             "type": "string",
@@ -80,7 +84,7 @@
         }
       },
       {
-        "title": "Clean Architecture Scaffolding",
+        "title": "TDD and Clean Architecture",
         "properties": {
           "scaffolding.repository.repo": {
             "type": "string",
@@ -90,7 +94,7 @@
         }
       },
       {
-        "title": "Clean Architecture Scaffolding",
+        "title": "TDD and Clean Architecture",
         "properties": {
           "scaffolding.repository.targetdir": {
             "type": "string",
