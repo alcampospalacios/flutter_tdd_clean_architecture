@@ -2,7 +2,7 @@
 
 A comprehensive collection of templates to scaffold Flutter applications following **Clean Architecture** principles with **Test-Driven Development (TDD)** practices.
 
-![Extension Demo](images/extension-demo.gif)
+<!-- ![Extension Demo](images/extension-demo.gif) -->
 
 ## 📋 Table of Contents
 
