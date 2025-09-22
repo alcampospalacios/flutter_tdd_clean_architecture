@@ -28,10 +28,10 @@ These templates implement **Uncle Bob's Clean Architecture** adapted for Flutter
 - **Scalability**: Easy to maintain and extend as the project grows
 - **Feature-First Organization**: Code organized by business features
 
-<div align="center">
+<!-- <div align="center">
   <img src="images/clean-architecture-diagram.png" alt="Clean Architecture Layers" width="600"/>
   <p><em>Clean Architecture layers implemented in this extension</em></p>
-</div>
+</div> -->
 
 ## ✨ Features
 
