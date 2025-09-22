@@ -486,7 +486,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
   <h3>🎯 Happy Coding with TDD and Clean Architecture! 🎯</h3>
   <p>Built with ❤️ for the Flutter community</p>
   
-  [![GitHub Stars](https://img.shields.io/github/stars/alcampospalacios/clean-architecture-scaffolding?style=social)](https://github.com/alcampospalacios/clean-architecture-scaffolding)
-  [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/d/alcampospalacios.clean-architecture-scaffolding)](https://marketplace.visualstudio.com/items?itemName=alcampospalacios.clean-architecture-scaffolding)
-  [![VS Code Marketplace Rating](https://img.shields.io/visual-studio-marketplace/r/alcampospalacios.tdd-clean-architecture)](https://marketplace.visualstudio.com/items?itemName=alcampospalacios.tdd-clean-architecture)
+  [![GitHub Stars]](https://github.com/alcampospalacios/flutter_tdd_clean_architecture)
+  [![VS Code Marketplace]](https://marketplace.visualstudio.com/items?itemName=alcampospalacios.tdd-clean-architecture)
+  [![VS Code Marketplace Rating]](https://marketplace.visualstudio.com/items?itemName=alcampospalacios.tdd-clean-architecture&ssr=false#review-details)
 </div>
