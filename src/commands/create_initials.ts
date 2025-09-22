@@ -68,6 +68,20 @@ export async function createInitials(uri: Uri) {
   }
 }
 
+/**
+ * 🔄 FUNCIÓN MODIFICADA: Copia templates con filtros específicos
+ *
+ * Esta función procesa templates pero aplica filtros especiales para el directorio 'test':
+ * - Para 'test': Solo procesa 'core/' y 'fixtures/'
+ * - Para otros tipos: Procesa todo normalmente
+ *
+ * @param templateFolder - Carpeta de templates a procesar
+ * @param rootFolder - Directorio raíz del proyecto
+ * @param clickedFolder - Carpeta donde se ejecutó el comando
+ * @param packageName - Nombre del paquete
+ * @param folderType - Tipo de carpeta ('config', 'core', 'test')
+ * @returns Número de archivos creados
+ */
 async function copyInitialTemplatesFromFolder(
   templateFolder: string,
   rootFolder: string,
@@ -75,10 +89,20 @@ async function copyInitialTemplatesFromFolder(
   packageName: string,
   folderType: string,
 ): Promise<number> {
-  // Get all template files recursively from this specific folder
-  const templateFiles = getAllTemplateFiles(templateFolder);
+  // 🔍 PASO 1: Obtener archivos con filtros específicos para 'test'
+  let templateFiles: string[];
+
+  if (folderType === 'test') {
+    // Para test, solo obtener archivos de carpetas específicas
+    templateFiles = getFilteredTestTemplateFiles(templateFolder);
+  } else {
+    // Para otros tipos, obtener todos los archivos normalmente
+    templateFiles = getAllTemplateFiles(templateFolder);
+  }
+
   let filesCreated = 0;
 
+  // 🔄 PASO 2: Procesar cada template file
   for (const templateFile of templateFiles) {
     try {
       // Get relative path from template folder (preserving subdirectory structure)
@@ -134,6 +158,101 @@ async function copyInitialTemplatesFromFolder(
   }
 
   return filesCreated;
+}
+
+/**
+ * 🔍 NUEVA FUNCIÓN: Obtiene archivos de test con filtros específicos
+ *
+ * Solo procesa archivos que estén dentro de las carpetas permitidas:
+ * - test/core/
+ * - test/fixtures/
+ *
+ * Excluye carpetas como:
+ * - test/usecase/
+ * - test/repository/
+ * - test/datasource/
+ * - etc.
+ *
+ * @param testFolder - Carpeta base de templates de test
+ * @returns Array de rutas de archivos filtrados
+ */
+function getFilteredTestTemplateFiles(testFolder: string): string[] {
+  const files: string[] = [];
+
+  if (!fs.existsSync(testFolder)) {
+    console.log(`⚠️ Test folder not found: ${testFolder}`);
+    return files;
+  }
+
+  // 📋 Definir carpetas permitidas para creación inicial
+  const allowedTestFolders = [
+    'core', // test/core/ - Tests de infraestructura core
+    'fixtures', // test/fixtures/ - Utilidades para testing
+  ];
+
+  // 🔄 Procesar solo las carpetas permitidas
+  allowedTestFolders.forEach((allowedFolder) => {
+    const allowedFolderPath = `${testFolder}/${allowedFolder}`;
+
+    if (fs.existsSync(allowedFolderPath)) {
+      // Obtener todos los templates de esta carpeta permitida recursivamente
+      const folderFiles = getAllTemplateFiles(allowedFolderPath);
+      files.push(...folderFiles);
+      console.log(`✅ Found ${folderFiles.length} template files in test/${allowedFolder}/`);
+    } else {
+      console.log(`⚠️ Allowed test folder not found: ${allowedFolderPath}`);
+    }
+  });
+
+  console.log(`📊 Total filtered test files: ${files.length}`);
+  return files;
+}
+
+/**
+ * 🔍 FUNCIÓN AUXILIAR: Lista carpetas excluidas para logging
+ *
+ * Útil para mostrar al usuario qué carpetas se están omitiendo.
+ */
+function getExcludedTestFolders(testFolder: string): string[] {
+  const excludedFolders: string[] = [];
+
+  if (!fs.existsSync(testFolder)) {
+    return excludedFolders;
+  }
+
+  const allItems = fs.readdirSync(testFolder);
+  const allowedFolders = ['core', 'fixtures'];
+
+  allItems.forEach((item) => {
+    const itemPath = `${testFolder}/${item}`;
+    const isDirectory = fs.statSync(itemPath).isDirectory();
+
+    if (isDirectory && !allowedFolders.includes(item)) {
+      excludedFolders.push(item);
+    }
+  });
+
+  return excludedFolders;
+}
+
+/**
+ * 📊 FUNCIÓN DE REPORTE: Muestra información sobre qué se procesó
+ *
+ * Útil para debugging y para informar al usuario qué se creó y qué se omitió.
+ */
+function reportTestFolderProcessing(testFolder: string): void {
+  const allowedFolders = ['core', 'fixtures'];
+  const excludedFolders = getExcludedTestFolders(testFolder);
+
+  if (excludedFolders.length > 0) {
+    console.log(`ℹ️  Initial setup - Processing only: ${allowedFolders.join(', ')}`);
+    console.log(`ℹ️  Initial setup - Excluded folders: ${excludedFolders.join(', ')}`);
+
+    // Opcional: mostrar mensaje al usuario
+    window.showInformationMessage(
+      `✅ Test infrastructure created (core, fixtures). Other test templates available for individual feature creation.`,
+    );
+  }
 }
 
 function replacePlaceholdersInPath(path: string, placeholders: any): string {

@@ -2,9 +2,12 @@
 
 A comprehensive collection of templates to scaffold Flutter applications following **Clean Architecture** principles with **Test-Driven Development (TDD)** practices.
 
+![Extension Demo](images/extension-demo.gif)
+
 ## 📋 Table of Contents
 
 - [🎯 Overview](#-overview)
+- [✨ Features](#-features)
 - [🗂️ Template Structure](#️-template-structure)
 - [🧱 Architecture Layers](#-architecture-layers)
 - [📁 Folder Organization](#-folder-organization)
@@ -24,6 +27,28 @@ These templates implement **Uncle Bob's Clean Architecture** adapted for Flutter
 - **Testability**: Every component can be unit tested in isolation
 - **Scalability**: Easy to maintain and extend as the project grows
 - **Feature-First Organization**: Code organized by business features
+
+<div align="center">
+  <img src="images/clean-architecture-diagram.png" alt="Clean Architecture Layers" width="600"/>
+  <p><em>Clean Architecture layers implemented in this extension</em></p>
+</div>
+
+## ✨ Features
+
+### 🎯 **Extension Commands Available**
+
+| Command | Description | Preview |
+|---------|-------------|---------|
+| **Create Initial Needs** | Sets up core infrastructure | ![Initial Setup](images/create-initial.png) |
+| **Add Dependencies** | Adds all Clean Arch dependencies | ![Add Dependencies](images/add-dependencies.png) |
+| **Create Folders** | Generates feature folder structure | ![Create Folders](images/create-folders.png) |
+| **New Use Case** | Creates use case with tests | ![New UseCase](images/new-usecase.png) |
+| **New Repository** | Creates repository pattern files | ![New Repository](images/new-repository.png) |
+
+### 🔧 **Right-Click Context Menu**
+![Context Menu](images/context-menu.png)
+
+Access all commands directly from VSCode's context menu by right-clicking on any folder.
 
 ## 🗂️ Template Structure
 
@@ -82,6 +107,11 @@ These templates implement **Uncle Bob's Clean Architecture** adapted for Flutter
 
 ## 🧱 Architecture Layers
 
+<div align="center">
+  <img src="images/architecture-flow.png" alt="Architecture Flow" width="700"/>
+  <p><em>Data flow between Clean Architecture layers</em></p>
+</div>
+
 ### 📱 **Presentation Layer** (`lib/src/{feature}/presentation/`)
 Handles UI components and user interactions.
 - **Pages**: Full-screen widgets (screens)
@@ -99,16 +129,20 @@ Contains business logic and rules (Framework independent).
 Manages data from various sources.
 - **Models**: Data transfer objects with JSON serialization
 - **Repositories**: Concrete implementations of domain repositories
-- **Datasources**: Abstract interfaces for data sources
+- **Datasources**: Abstract interfaces and implementations for data sources 
+
+### 💉 **Config** (`lib/src/{feature}/config/`)
+Contains the injection dependencies of the feature. 
 
 ### ⚙️ **Core Layer** (`lib/core/`)
 Shared functionality across the entire application.
 - **API**: HTTP client configuration and error handling
-- **Storage**: Local and secure storage abstractions
+- **Storage**: Local and secure storage abstractions and his implementations
 - **Errors**: Application-wide error handling
 - **Utils**: Common utilities and type definitions
 - **UseCase**: Base classes for use cases
 - **Config**: Injections of dependencies of core
+
 
 ## 📁 Folder Organization
 
@@ -124,11 +158,12 @@ lib/src/{feature_name}/
 │   ├── entities/
 │   ├── repositories/
 │   └── usecases/
-└── presentation/
-    ├── blocs/
-    ├── pages/
-    ├── utils/
-    └── widgets/
+├── presentation/
+│   ├── blocs/
+│   ├── pages/
+│   ├── utils/
+│   └── widgets/
+└── config/
 ```
 
 ### 🧪 **Testing Structure**
@@ -155,15 +190,28 @@ test/src/{feature_name}/
 - **DioInterceptor**: Authentication and logging
 - **HandleException**: Unified error handling
 
+### ⚡ **Config Layer**
+- Uses **GetIt** for service location
+- Modular registration by feature
+- Easy to mock for testing
+
 ### 💾 **Storage Layer**
 - **LocalStorageHandler**: Unified interface for storage
 - **LocalStorageKeys**: Centralized key management
 - Supports both regular and secure storage
 
-### ⚡ **Dependency Injection**
-- Uses **GetIt** for service location
-- Modular registration by feature
-- Easy to mock for testing
+### 🐞 **Errors Layer**
+- **ServerException**: Represents a standardized server-side error within the application
+- **Failure**: Represents an error that has been transformed from a low-level [Exception] (e.g., [ServerException]) into a higher-level abstraction suitable for the domain and presentation layers
+
+### 🧩 **Usecase Layer**
+- **UsecaseBaseWithParams**: Base class for a use case that requires input [Params]
+- **UsecaseBaseWithoutParams**: Base class for a use case that does not require input parameters
+
+### ⚡ **Utils Layer**
+- **Either**: A generic representation of a value that can be one of two possible types
+- **ResultFuture**: This allow to get a short way to reuse the declared method when some contract is created
+- **DataMap**: With this approach we eliminate boilerplate
 
 ## 🧪 Testing Structure
 
@@ -187,6 +235,9 @@ test/
 ```
 
 ## 📦 Dependencies
+
+![Dependencies Preview](images/dependencies-preview.png)
+
 ### 🏗️ **Core Dependencies**
 ```yaml
 dependencies:
@@ -217,19 +268,36 @@ dev_dependencies:
 
 ## 🚀 Usage
 
+### 📹 **Quick Start Video**
+<div align="center">
+  <a href="https://youtu.be/your-video-id">
+    <img src="images/video-thumbnail.png" alt="Quick Start Video" width="500"/>
+  </a>
+  <p><em>Click to watch the complete setup guide (5 minutes)</em></p>
+</div>
+
 ### 1️⃣ **Setup Initial Architecture**
+
+![Step 1](images/step1-initial-setup.gif)
+
 ```bash
 # Right-click on project folder → "TDD Clean Arch.: Create initial needs"
 ```
 This creates the complete core infrastructure.
 
 ### 2️⃣ **Add Dependencies**
+
+![Step 2](images/step2-add-dependencies.gif)
+
 ```bash
 # Right-click on project folder → "TDD Clean Arch.: Add dependencies"
 ```
 Automatically adds all required dependencies to `pubspec.yaml`.
 
 ### 3️⃣ **Create Feature Folders**
+
+![Step 3](images/step3-create-folders.gif)
+
 ```bash
 # Right-click on lib/src/ → "TDD Clean Arch.: Create folders"
 # Enter feature name (e.g., "authentication")
@@ -237,6 +305,9 @@ Automatically adds all required dependencies to `pubspec.yaml`.
 This create the entire folder structure to a new feature
 
 ### 4️⃣ **Generate Use Cases**
+
+![Step 4](images/step4-new-usecase.gif)
+
 ```bash
 # Right-click on feature/domain/usecases/ → "TDD Clean Arch.: New usecase with params"
 # Enter use case name (e.g., "login_user")
@@ -244,12 +315,15 @@ This create the entire folder structure to a new feature
 This creates a usecase with support to Params
 
 ```bash
-# Right-click on feature/domain/usecases/ → "TDD Clean Arch.: New usecase without params","
-# Enter use case name (e.g., "login_user")
+# Right-click on feature/domain/usecases/ → "TDD Clean Arch.: New usecase without params"
+# Enter use case name (e.g., "logout_user")
 ```
 This creates a usecase with no needs to Params
 
 ### 5️⃣ **Generate Repository**
+
+![Step 5](images/step5-new-repository.gif)
+
 ```bash
 # Right-click on feature/domain/repository/ → "TDD Clean Arch.: New Repository"
 # Enter repository name (e.g., "authentication")
@@ -258,7 +332,14 @@ This create a repository, with his respective datasource
 
 ## 📚 Examples
 
-### 🔐 **Authentication Feature Example**
+### 🔐 **Generated Project Structure**
+
+<div align="center">
+  <img src="images/generated-project-structure.png" alt="Generated Project Structure" width="400"/>
+  <p><em>Complete feature structure generated by the extension</em></p>
+</div>
+
+### **Authentication Feature Example**
 ```
 lib/src/authentication/
 ├── data/
@@ -293,7 +374,10 @@ lib/src/authentication/
           └── snackbar_helper.dart
 ```
 
-### 🧪 **Test Example**
+### 🧪 **Generated Test Example**
+
+![Generated Test](images/generated-test-example.png)
+
 ```dart
 class MockIAuthenticationRepository extends Mock implements IAuthenticationRepository
 // test/src/authentication/domain/usecases/login_user_test.dart
@@ -330,6 +414,8 @@ void main() {
 
 ## 🎯 **Template Variables**
 
+![Template Variables](images/template-variables.png)
+
 Templates support the following placeholders:
 
 | Placeholder | Description | Example |
@@ -347,6 +433,10 @@ Each placeholder supports multiple case formats:
 - `{{placeholder.upperCase}}` → `LOGIN USER`
 
 ## 🏗️ **Architecture Benefits**
+
+<div align="center">
+  <img src="images/architecture-benefits.png" alt="Architecture Benefits" width="600"/>
+</div>
 
 ### ✅ **Testability**
 - Each layer can be tested independently
@@ -368,7 +458,21 @@ Each placeholder supports multiple case formats:
 - Framework-agnostic business logic
 - Adaptable to changing requirements
 
+## 🛠️ **Installation**
+
+![Installation](images/installation.gif)
+
+1. **From VSCode Marketplace:**
+   - Open VSCode
+   - Go to Extensions (Ctrl+Shift+X)
+   - Search "TDD Clean Architecture"
+   - Click Install
+
 ## 🤝 Contributing
+
+We welcome contributions! Here's how you can help:
+
+![Contributing](images/contributing-flow.png)
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -383,6 +487,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
+  <img src="images/footer-banner.png" alt="Footer Banner" width="600"/>
   <h3>🎯 Happy Coding with TDD and Clean Architecture! 🎯</h3>
   <p>Built with ❤️ for the Flutter community</p>
+  
+  [![GitHub Stars](https://img.shields.io/github/stars/alcampospalacios/clean-architecture-scaffolding?style=social)](https://github.com/alcampospalacios/clean-architecture-scaffolding)
+  [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/d/alcampospalacios.clean-architecture-scaffolding)](https://marketplace.visualstudio.com/items?itemName=alcampospalacios.clean-architecture-scaffolding)
+  [![VS Code Marketplace Rating](https://img.shields.io/visual-studio-marketplace/r/alcampospalacios.tdd-clean-architecture)](https://marketplace.visualstudio.com/items?itemName=alcampospalacios.tdd-clean-architecture)
 </div>

@@ -149,7 +149,7 @@
       },
       {
         "command": "tdd-clean-architecture.createFolders",
-        "title": "TDD Clean Arch.: Create folders",
+        "title": "TDD Clean Arch.: Create feature",
         "category": "TDD Clean Arch"
       },
       {
