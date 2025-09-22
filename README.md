@@ -280,7 +280,9 @@ dev_dependencies:
 
 ### 1️⃣ **Setup Initial Architecture**
 
-![Step 1](videos/step1-initial-setup.mp4)
+<video src="videos/step1-initial-setup.mp4" controls width="600">
+  your browser don't support video
+</video>
 
 ```bash
 # Right-click on project folder → "TDD Clean Arch.: Create initial needs"
@@ -289,7 +291,9 @@ This creates the complete core infrastructure.
 
 ### 2️⃣ **Add Dependencies**
 
-![Step 2](videos/step2-add-dependencies.mp4)
+<video src="videos/step2-add-dependencies.mp4" controls width="600">
+  your browser don't support video
+</video>
 
 ```bash
 # Right-click on project folder → "TDD Clean Arch.: Add dependencies"
@@ -298,7 +302,9 @@ Automatically adds all required dependencies to `pubspec.yaml`.
 
 ### 3️⃣ **Create Feature Folders**
 
-![Step 3](videos/step3-create-folders.mp4)
+<video src="videos/step3-create-folders.mp4" controls width="600">
+  your browser don't support video
+</video>
 
 ```bash
 # Right-click on lib/src/ → "TDD Clean Arch.: Create feature"
@@ -307,8 +313,10 @@ Automatically adds all required dependencies to `pubspec.yaml`.
 This create the entire folder structure to a new feature
 
 ### 4️⃣ **Generate Use Cases**
+<video src="videos/step4-new-usecase.mp4" controls width="600">
+  your browser don't support video
+</video>
 
-![Step 4](videos/step4-new-usecase.mp4)
 
 ```bash
 # Right-click on feature/domain/usecases/ → "TDD Clean Arch.: New usecase with params"
@@ -323,8 +331,9 @@ This creates a usecase with support to Params
 This creates a usecase with no needs to Params
 
 ### 5️⃣ **Generate Repository**
-
-![Step 5](videos/step5-new-repository.mp4)
+<video src="videos/step5-new-repository.mp4" controls width="600">
+  your browser don't support video
+</video>
 
 ```bash
 # Right-click on feature/domain/repository/ → "TDD Clean Arch.: New Repository"
