@@ -36,7 +36,7 @@ void main() {
     // simple strings here, it’s not needed yet.
   });
 
-  //! To this example we going supose tha in the repository call the method [login]
+  //! To this example we going suppose that in the repository call the method [login]
   test(
      '{{usecase_name.pascalCase}}Usecase: [IRepository.login] should be called ',
     () async {

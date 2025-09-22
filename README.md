@@ -40,8 +40,9 @@ These templates implement **Uncle Bob's Clean Architecture** adapted for Flutter
 | Command | Description | Preview |
 |---------|-------------|---------|
 | **Create Initial Needs** | Sets up core infrastructure | ![Initial Setup](images/create-initial.png) |
-| **Add Dependencies** | Adds all Clean Arch dependencies | ![Add Dependencies](images/add-dependencies.png) |
-| **Create Folders** | Generates feature folder structure | ![Create Folders](images/create-folders.png) |
+| **Check Dependencies** |Check all Clean Arch dependencies | ![Check Dependencies](images/check-dependencies.png) |
+| **Add Dependencies** |Add all Clean Arch dependencies | ![Add Dependencies](images/add-dependencies.png) |
+| **Create Feature** | Generates feature folder structure | ![Create Feature](images/create-folders.png) |
 | **New Use Case** | Creates use case with tests | ![New UseCase](images/new-usecase.png) |
 | **New Repository** | Creates repository pattern files | ![New Repository](images/new-repository.png) |
 
@@ -107,10 +108,10 @@ Access all commands directly from VSCode's context menu by right-clicking on any
 
 ## 🧱 Architecture Layers
 
-<div align="center">
+<!-- <div align="center">
   <img src="images/architecture-flow.png" alt="Architecture Flow" width="700"/>
   <p><em>Data flow between Clean Architecture layers</em></p>
-</div>
+</div> -->
 
 ### 📱 **Presentation Layer** (`lib/src/{feature}/presentation/`)
 Handles UI components and user interactions.
@@ -266,19 +267,20 @@ dev_dependencies:
     sdk: flutter
 ```
 
-## 🚀 Usage
+<!-- TODO -->
+<!-- ## 🚀 Usage -->
 
-### 📹 **Quick Start Video**
+<!-- ### 📹 **Quick Start Video**
 <div align="center">
   <a href="https://youtu.be/your-video-id">
     <img src="images/video-thumbnail.png" alt="Quick Start Video" width="500"/>
   </a>
   <p><em>Click to watch the complete setup guide (5 minutes)</em></p>
-</div>
+</div> -->
 
 ### 1️⃣ **Setup Initial Architecture**
 
-![Step 1](images/step1-initial-setup.gif)
+![Step 1](videos/step1-initial-setup.mp4)
 
 ```bash
 # Right-click on project folder → "TDD Clean Arch.: Create initial needs"
@@ -287,7 +289,7 @@ This creates the complete core infrastructure.
 
 ### 2️⃣ **Add Dependencies**
 
-![Step 2](images/step2-add-dependencies.gif)
+![Step 2](videos/step2-add-dependencies.mp4)
 
 ```bash
 # Right-click on project folder → "TDD Clean Arch.: Add dependencies"
@@ -296,17 +298,17 @@ Automatically adds all required dependencies to `pubspec.yaml`.
 
 ### 3️⃣ **Create Feature Folders**
 
-![Step 3](images/step3-create-folders.gif)
+![Step 3](videos/step3-create-folders.mp4)
 
 ```bash
-# Right-click on lib/src/ → "TDD Clean Arch.: Create folders"
+# Right-click on lib/src/ → "TDD Clean Arch.: Create feature"
 # Enter feature name (e.g., "authentication")
 ```
 This create the entire folder structure to a new feature
 
 ### 4️⃣ **Generate Use Cases**
 
-![Step 4](images/step4-new-usecase.gif)
+![Step 4](videos/step4-new-usecase.mp4)
 
 ```bash
 # Right-click on feature/domain/usecases/ → "TDD Clean Arch.: New usecase with params"
@@ -322,7 +324,7 @@ This creates a usecase with no needs to Params
 
 ### 5️⃣ **Generate Repository**
 
-![Step 5](images/step5-new-repository.gif)
+![Step 5](videos/step5-new-repository.mp4)
 
 ```bash
 # Right-click on feature/domain/repository/ → "TDD Clean Arch.: New Repository"
@@ -382,39 +384,40 @@ lib/src/authentication/
 class MockIAuthenticationRepository extends Mock implements IAuthenticationRepository
 // test/src/authentication/domain/usecases/login_user_test.dart
 void main() {
-  group('Login', () {
-    late Login usecase;
-    late IAuthenticationRepository mockRepository;
+  late LoginUsecase usecase;
+  late IAuthenticationRepository mockIRepository;
 
-    setUp(() {
-      mockRepository = MockIAuthenticationRepository();
-      usecase = Login(mockRepository);
-    });
+  setUp(() {
+    mockIRepository = MockIAuthenticationRepository(); 
+    usecase = LoginUsecase(mockIRepository);
 
-    test('should return User when login is successful', () async {
-      // arrange
-      const tUser = User(id: '1', email: 'test@test.com');
-      when(() => mockRepository.login(any(), any()))
-          .thenAnswer((_) async => const Right(tUser));
-
-      // act
-      final result = await usecase(LoginParams(
-        email: 'test@test.com',
-        password: 'password',
-      ));
-
-      // assert
-      expect(result, const Right<Failure, User>(tUser));
-      verify(() => mockRepository.login('test@test.com', 'password')).called(1);
-      verifyNoMoreInteractions(mockRepository);
-    });
   });
+
+  //! To this example we going suppose that in the repository call the method [login]
+  test(
+    'LoginUsecase: [IAuthenticationRepository.login] should call with the correct parameters',
+    () async {
+      // Arrange
+      final params = Params(email: 'test@gmail.com', password: 'password');
+      when(
+        () => mockIRepository.login(email: params.email, password: params.password),
+      ).thenAnswer((_) async => Right(Token(accessToken: 'accessToken', tokenType: 'tokenType'))); // ! TODO: Replace 
+
+      // Act
+      final result = await usecase(params); // Here we call the usecase and fired the IRepository.methodCall
+
+      // Assert
+      expect(result, Right<Failure, Token>(Token(accessToken: 'accessToken', tokenType: 'tokenType'))); // ! TODO: Replace [Token] by your entity
+      verify(
+        () => mockIRepository.login(email: params.email, password: params.password), // ! TODO: Replace [mockIRepository.login] by your real call
+      ).called(1); //! To Verify the repo is called once
+      verifyNoMoreInteractions(mockIRepository); //! Verify not more interacion with the IRepository
+    },
+  );
 }
 ```
 
 ## 🎯 **Template Variables**
-
-![Template Variables](images/template-variables.png)
 
 Templates support the following placeholders:
 
@@ -433,10 +436,6 @@ Each placeholder supports multiple case formats:
 - `{{placeholder.upperCase}}` → `LOGIN USER`
 
 ## 🏗️ **Architecture Benefits**
-
-<div align="center">
-  <img src="images/architecture-benefits.png" alt="Architecture Benefits" width="600"/>
-</div>
 
 ### ✅ **Testability**
 - Each layer can be tested independently
@@ -460,8 +459,6 @@ Each placeholder supports multiple case formats:
 
 ## 🛠️ **Installation**
 
-![Installation](images/installation.gif)
-
 1. **From VSCode Marketplace:**
    - Open VSCode
    - Go to Extensions (Ctrl+Shift+X)
@@ -471,8 +468,6 @@ Each placeholder supports multiple case formats:
 ## 🤝 Contributing
 
 We welcome contributions! Here's how you can help:
-
-![Contributing](images/contributing-flow.png)
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -487,7 +482,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
-  <img src="images/footer-banner.png" alt="Footer Banner" width="600"/>
+  <img src="logo.png" alt="Footer Banner" width="600"/>
   <h3>🎯 Happy Coding with TDD and Clean Architecture! 🎯</h3>
   <p>Built with ❤️ for the Flutter community</p>
   
